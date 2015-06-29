@@ -1,3 +1,6 @@
+//Untitled Game
+//By Alasdair Hogarth + David Wagner
+
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
