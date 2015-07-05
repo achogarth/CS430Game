@@ -86,9 +86,10 @@ int main( void )
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
-	bool res = loadOBJ("Player.obj", vertices, uvs, normals);
-	bool res = loadOBJ("Bad1.obj", vertices, uvs, normals);
-	bool res = loadOBJ("Bad2.obj", vertices, uvs, normals);
+	bool res;
+	//res = loadOBJ("Player.obj", vertices, uvs, normals);
+	res = loadOBJ("Bad1.obj", vertices, uvs, normals);
+	//res = loadOBJ("Bad2.obj", vertices, uvs, normals);
 
 	// Load it into a VBO
 
@@ -176,5 +177,29 @@ int main( void )
 	glfwTerminate();
 
 	return 0;
+}/*
+
+class Player{
+
+	int location;
+	int end;
+
+	Player(int loc){
+		location = loc;
+		end = loc + 18;
+	}
+	
 }
 
+class Bad1{
+
+
+
+}
+
+class Bad2{
+
+
+
+}
+*/
