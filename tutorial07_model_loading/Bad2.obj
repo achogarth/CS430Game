@@ -1,0 +1,37 @@
+# Blender3D v249 OBJ File: untitled.blend
+# www.blender3d.org
+mtllib cube.mtl
+
+
+
+
+
+
+#Player vertices
+v 0 2 0		
+v 0.8 -0.2 0
+v 2 2 0
+v 1 -2 0
+v 0 -1 0
+v -1 -2 0
+v -2 2 0
+v -0.8 -0.2 0
+
+vt 0 0	
+vt 1 0
+vt 0 1
+vt 1 1
+
+
+vn 0 0 1		#1
+
+
+usemtl Material_ray.png
+s off
+#walls 36 vertices
+f 1/1/1 8/1/1 5/1/1
+f 1/1/1 5/1/1 2/1/1
+f 8/1/1 6/1/1 5/1/1
+f 2/1/1 5/1/1 4/1/1
+f 8/1/1 7/1/1 6/1/1
+f 3/1/1 2/1/1 4/1/1
