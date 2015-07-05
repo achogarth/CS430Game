@@ -7,7 +7,7 @@ mtllib cube.mtl
 
 
 
-#Player vertices
+#Bad1 vertices
 v 0 2 0		
 v 0.8 -0.2 0
 v 2 2 0
@@ -26,9 +26,18 @@ vt 1 1
 vn 0 0 1		#1
 
 
+
+
+
+
+
+
+
+
+
 usemtl Material_ray.png
 s off
-#walls 36 vertices
+#Bad1 triangles
 f 1/1/1 8/1/1 5/1/1
 f 1/1/1 5/1/1 2/1/1
 f 8/1/1 6/1/1 5/1/1
