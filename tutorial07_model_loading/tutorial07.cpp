@@ -76,7 +76,7 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Load the texture
-	GLuint Texture = loadDDS("uvmap.DDS");
+	GLuint Texture = loadBMP_custom("Images/Master.bmp");
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
@@ -87,8 +87,8 @@ int main( void )
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
 	bool res;
-	//res = loadOBJ("Player.obj", vertices, uvs, normals);
-	res = loadOBJ("Bad1.obj", vertices, uvs, normals);
+	res = loadOBJ("Player.obj", vertices, uvs, normals);
+	//res = loadOBJ("Bad1.obj", vertices, uvs, normals);
 	//res = loadOBJ("Bad2.obj", vertices, uvs, normals);
 
 	// Load it into a VBO
