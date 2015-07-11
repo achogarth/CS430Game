@@ -41,7 +41,7 @@ void computeMatricesFromInputs(){
 	float deltaTime = float(currentTime - lastTime);
 
 	
-	ProjectionMatrix = glm::ortho(-320.0f, 320.0f, -240.0f, 240.0f, 100.0f, -100.0f);
+	ProjectionMatrix = glm::ortho(-5.0f, 5.0f, -3.0f, 3.0f, 100.0f, -100.0f);
 
 	// Get mouse position
 	//double xpos, ypos;
@@ -55,7 +55,7 @@ void computeMatricesFromInputs(){
 	//verticalAngle   += mouseSpeed * float( 768/2 - ypos );
 
 	// Direction : Spherical coordinates to Cartesian coordinates conversion
-	glm::vec3 direction(
+	/*glm::vec3 direction(
 		cos(verticalAngle) * sin(horizontalAngle), 
 		sin(verticalAngle),
 		cos(verticalAngle) * cos(horizontalAngle)
@@ -90,7 +90,7 @@ void computeMatricesFromInputs(){
 
 	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
 
-	//ortho
+	//ortho*/
 	// Camera matrix
 	ViewMatrix       = glm::lookAt(
 								glm::vec3(0.0f,0.0f,10.0f),           // Camera is here
