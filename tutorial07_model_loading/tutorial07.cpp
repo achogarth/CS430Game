@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <common/Entity.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -38,7 +39,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1024, 768, "Tutorial 07 - Model Loading", NULL, NULL);
+	window = glfwCreateWindow( 640, 480, "Game", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -58,7 +59,7 @@ int main( void )
 	glfwSetCursorPos(window, 1024/2, 768/2);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -79,7 +80,7 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Load the texture
-	GLuint Texture = loadBMP_custom("Images/Master.bmp");
+	GLuint Texture = loadBMP_custom("Images/TextureDump2.bmp");
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
@@ -90,7 +91,7 @@ int main( void )
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
 	bool res;
-	res = loadOBJ("Player.obj", vertices, uvs, normals);
+	res = loadOBJ("Player2.obj", vertices, uvs, normals);
 	//res = loadOBJ("Bad1.obj", vertices, uvs, normals);
 	//res = loadOBJ("Bad2.obj", vertices, uvs, normals);
 
