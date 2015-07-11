@@ -59,7 +59,7 @@ int main( void )
 	glfwSetCursorPos(window, 1024/2, 768/2);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 50.0f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -90,11 +90,10 @@ int main( void )
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
-	bool res;
-	res = loadOBJ("Player2.obj", vertices, uvs, normals);
-	//res = loadOBJ("Bad1.obj", vertices, uvs, normals);
-	//res = loadOBJ("Bad2.obj", vertices, uvs, normals);
-
+	//bool res;
+	//res = loadOBJ("Player2.obj", vertices, uvs, normals);
+	Entity* player = new Entity(vertices, uvs, normals, "Player2.obj", glm::vec3(0.0f,0.0f,0.0f),7,3);
+	//player->setTexture(7,1, uvs);
 	// Load it into a VBO
 
 	GLuint vertexbuffer;
