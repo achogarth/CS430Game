@@ -7,7 +7,6 @@
 class Entity
 {
 public:
-	Entity();
 	Entity(
 		std::vector<glm::vec3> & vertexBuffer,
 		std::vector<glm::vec2> & uvBuffer,

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <common/Entity.h>
+#include <common\Player.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -24,6 +25,41 @@ using namespace glm;
 #include <common/controls.hpp>
 #include <common/objloader.hpp>
 
+
+
+/*************************************************************
+To Do:
+-	Add method definitions for creating player;
+-	Add method definitions for each type of enemy 
+	(this will allow a simple method call to set speed, 
+	movement, etc without having to manually set for 
+	each of that enemy type);
+-	Add second do loop for second level;
+-	Remove superfluous tutorial 7 code
+
+
+
+**************************************************************/
+Entity* addPlayer (int numOfLives,
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer) //textureBuffer
+{
+	Entity* player = new Player(
+		4,							//number of lives
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		glm::vec3(0.0f,4.0f,0.0f),	//position on screen
+		7,							//texture row
+		7							//texture column
+		);
+	return player;
+};
+
+bool white = false;
+
 int main( void )
 {
 	// Initialise GLFW
@@ -39,7 +75,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 640, 480, "Game", NULL, NULL);
+	window = glfwCreateWindow( 800, 800, "Game", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -59,7 +95,8 @@ int main( void )
 	glfwSetCursorPos(window, 1024/2, 768/2);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 50.0f, 0.0f);
+	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
+	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -90,9 +127,16 @@ int main( void )
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
-	//bool res;
-	//res = loadOBJ("Player2.obj", vertices, uvs, normals);
-	Entity* player = new Entity(vertices, uvs, normals, "Player2.obj", glm::vec3(0.0f,0.0f,0.0f),7,3);
+	//add earth and stretch out
+	bool res;
+	res = loadOBJ("earth.obj", vertices, uvs, normals);
+	glm::mat4 stretch = glm::scale(glm::mat4(1.0f), glm::vec3(30.0f,3.0f,1.0f));
+	for (int i = 0; i< vertices.size();i++){
+		glm::vec4 point = glm::vec4(vertices[i],1.0f);
+		point = stretch * point;
+		vertices[i] = glm::vec3(point.x, point.y, point.z);
+	}
+	Entity* player = addPlayer(4, vertices, uvs, normals);
 	//player->setTexture(7,1, uvs);
 	// Load it into a VBO
 
@@ -180,29 +224,4 @@ int main( void )
 	glfwTerminate();
 
 	return 0;
-}/*
-
-class Player{
-
-	int location;
-	int end;
-
-	Player(int loc){
-		location = loc;
-		end = loc + 18;
-	}
-	
 }
-
-class Bad1{
-
-
-
-}
-
-class Bad2{
-
-
-
-}
-*/

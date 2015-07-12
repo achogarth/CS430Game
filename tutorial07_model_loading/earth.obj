@@ -10,14 +10,14 @@ mtllib cube.mtl
 #Player vertices
 v -1 1 0
 v 1 1 0
-v -1 -1 0
-v 1 -1 0
+v -1 0 0
+v 1 0 0
 
 #Player textures
-vt 0 0.125
-vt 0.125 0.125
-vt 0  0
-vt 0.125 0
+vt 0.875  0
+vt 1 0
+vt 0.875 0.125
+vt 1 0.125
 
 
 #normal
