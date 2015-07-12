@@ -16,7 +16,6 @@ int speed;
 int currentTextureRow, currentTextureCol;
 
 
-Entity::Entity(){}
 
 Entity::Entity(
 	std::vector<glm::vec3> & vertexBuffer, 
@@ -30,13 +29,18 @@ Entity::Entity(
 	//save index of first vertex
 	position = int(vertexBuffer.size());
 	//read object file
-
 	loadOBJ(objPath, vertexBuffer, uvBuffer, normalBuffer);
 
 	//save number of vertices added to buffer
 	length = int(vertexBuffer.size()) - position;
 
-	//set location
+	//set location of object
+	glm::mat4 translate = glm::translate(glm::mat4(1.0f),location);
+	for (int i = position; i < position + length; i++){
+		glm::vec4 point = glm::vec4(vertexBuffer[i],1.0f);
+		point = translate * point;
+		vertexBuffer[i] = glm::vec3(point.x, point.y, point.z);
+	}
 
 	//set hitpoints
 	hitpoints = 1;
@@ -95,10 +99,10 @@ void Entity::setTexture(
 	float x = float(col) / 8;
 	float y = float(row) / 8;
 
-	glm::vec2 topLeft = glm::vec2(x,y);
-	glm::vec2 topRight = glm::vec2(x+0.125,y);
-	glm::vec2 bottomLeft = glm::vec2(x,y+0.125);
-	glm::vec2 bottomRight = glm::vec2(x+0.125,y+0.125);
+	glm::vec2 topLeft = glm::vec2(x,y+0.125);
+	glm::vec2 topRight = glm::vec2(x+0.125,y+0.125);
+	glm::vec2 bottomLeft = glm::vec2(x,y);
+	glm::vec2 bottomRight = glm::vec2(x+0.125,y);
 
 	textureBuffer[position+0] = topLeft;//top left
 	textureBuffer[position+1] = bottomLeft;//bottom left
