@@ -4,6 +4,7 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <vector>
 #include <common/Entity.h>
 #include <common\Player.h>
@@ -18,6 +19,7 @@ GLFWwindow* window;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm\gtx\string_cast.hpp>
 using namespace glm;
 
 #include <common/shader.hpp>
@@ -28,9 +30,9 @@ using namespace glm;
 
 
 /*************************************************************
-To Do:
--	Add method definitions for creating player;
--	Add method definitions for each type of enemy 
+To Do: (! indicates done, % indicates partial completion)
+-!	Add method definitions for creating player;
+-%	Add method definitions for each type of enemy 
 	(this will allow a simple method call to set speed, 
 	movement, etc without having to manually set for 
 	each of that enemy type);
@@ -51,12 +53,30 @@ Entity* addPlayer (int numOfLives,
 		uvBuffer,					//texture buffer
 		normalBuffer,				//normal buffer
 		"Player2.obj",				//object file
-		glm::vec3(0.0f,4.0f,0.0f),	//position on screen
+		glm::vec3(0.0f,4.0f,0.0f),	//location on screen
 		7,							//texture row
 		7							//texture column
 		);
 	return player;
 };
+
+Entity* addTurtle (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* turtle = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		7,							//texture row
+		1	);
+
+	return turtle;
+}
 
 bool white = false;
 
@@ -127,6 +147,9 @@ int main( void )
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
+
+	//-----------------------level one setup--------------------------------------
+
 	//add earth and stretch out
 	bool res;
 	res = loadOBJ("earth.obj", vertices, uvs, normals);
@@ -136,8 +159,30 @@ int main( void )
 		point = stretch * point;
 		vertices[i] = glm::vec3(point.x, point.y, point.z);
 	}
+
+	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
-	//player->setTexture(7,1, uvs);
+	glm::vec4 point1 = glm::vec4(1.0f);
+	player->getLocation(vertices,point1); // problems with this method call
+	std::cout<< glm::to_string(point1)<< std::endl;
+
+	std::vector<Entity*> wave1;
+	for (int i = 0; i < 8; i++)
+	{
+		wave1.push_back(addTurtle(vertices,uvs,normals,glm::vec3(-13.0+(2*i),30.0f,0.0f)));
+	}
+
+	for (int i = 0; i < wave1.size(); i++)
+	{
+		Entity* current = wave1[i];
+		current->moveY(vertices, -1.0);
+	}
+	
+
+	//-------------------------------------------------------------------------------
+
+
+
 	// Load it into a VBO
 
 	GLuint vertexbuffer;

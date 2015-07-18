@@ -28,10 +28,23 @@ Player::Player(
 
 int Player::getLives(){return lives;}
 
-int Player::removeLife(){
-	if (lives > 0) 
-	{
-		return --lives;
-	}
-	return lives;
+int Player::removeLife()
+{
+		if (lives > 0) 
+		{
+			return --lives;
+		}
+
+		return 0;
 }
+
+bool Player::collide(){
+	if (removeLife() == 0)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+void Player::move(){}

@@ -21,7 +21,9 @@ public:
 
 	int getLives();
 
-	int removeLife();
+	int removeLife(); // decrements current lives and returns remaining lives
 
-	
+	bool collide(); // returns true if the player has no lives remaining
+
+	void move();
 };
