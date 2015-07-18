@@ -22,6 +22,7 @@ int vertexCount;
 int hitpoints;
 int mySpeed;
 int currentTextureRow, currentTextureCol;
+double creationTime;
 
 Entity::Entity(
 	std::vector<glm::vec3> & vertexBuffer, 
@@ -60,6 +61,9 @@ Entity::Entity(
 	currentTextureRow = textureRow;
 	currentTextureCol = textureColumn;
 	setTexture(currentTextureRow,currentTextureCol, uvBuffer);
+
+	//set creationtime
+	creationTime = glfwGetTime();
 }
 
 
@@ -96,14 +100,24 @@ int Entity::getLengthInBuffer()
 	return vertexCount;
 }
 
-void Entity::moveX()
+void Entity::moveX(std::vector<glm::vec3> & vertexBuffer, float time)
 {
+	glm::vec4 point;
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3((mySpeed*time),0.0f,0.0f));
+	for (int i = position; i < (position + vertexCount); i++)
+	{
+		point = glm::vec4(vertexBuffer[i], 1.0f);
+		point = trans * point;
+		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
+		vertexBuffer[i] = glm::vec3(point.x,point.y,point.z);
+		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
+	}
 }
 
 void Entity::moveY(std::vector<glm::vec3> & vertexBuffer, float time)
 {
 	glm::vec4 point;
-	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,(speed*time),0.0f));
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,(mySpeed*time),0.0f));
 	for (int i = position; i < (position + vertexCount); i++)
 	{
 		point = glm::vec4(vertexBuffer[i], 1.0f);
@@ -138,8 +152,7 @@ void Entity::setTexture(
 	
 }
 
-//having problems passing the vec4
-void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point)
+void Entity::getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point)
 {
 	//calculate center of entity and return the center point
 	
@@ -187,4 +200,9 @@ void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point)
 	point.z = 0.0f;
 	point.w = 1.0f;
 
+}
+
+double Entity::getLifeSpan(void)
+{
+	return glfwGetTime() - creationTime;
 }

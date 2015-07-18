@@ -56,18 +56,18 @@ Entity* addPlayer (int numOfLives,
 		glm::vec3(0.0f,4.0f,0.0f),	//location on screen
 		2,							//texture row
 		0,							//texture column
-		3.0
+		20.0
 		);
 	return player;
 };
 
-Entity* addTurtle (
+Entity* addSpiral (
 		std::vector<glm::vec3> & vertexBuffer,
 		std::vector<glm::vec2> & uvBuffer,
 		std::vector<glm::vec3> & normalBuffer,
 		glm::vec3 location)
 {
-	Entity* turtle = new Entity(
+	Entity* spiral = new Entity(
 		vertexBuffer,				//vertex buffer
 		uvBuffer,					//texture buffer
 		normalBuffer,				//normal buffer
@@ -75,9 +75,47 @@ Entity* addTurtle (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		2.0f);
+		1.0f);
 
-	return turtle;
+	return spiral;
+}
+
+Entity* addEgg (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* egg = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		1,
+		1.0f);
+
+	return egg;
+}
+
+Entity* addBullet (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* bullet = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		4,							//texture row
+		2,
+		10.0f);
+
+	return bullet;
 }
 
 bool white = false;
@@ -97,7 +135,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 800, 800, "Game", NULL, NULL);
+	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -165,15 +203,18 @@ int main( void )
 	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
 	glm::vec4 point1 = glm::vec4(1.0f);
-	//player->getLocation(vertices,point1); // problems with this method call
-	std::cout<< glm::to_string(point1)<< std::endl;
 
 	std::vector<Entity*> wave1;
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 15; i++)
 	{
-		wave1.push_back(addTurtle(vertices,uvs,normals,glm::vec3(-13.0+(2*i),30.0f,0.0f)));
+		
+		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
+		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
+		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
+		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
 	}
 
+	std::vector<Entity*> bullets;
 	//-------------------------------------------------------------------------------
 
 
@@ -190,13 +231,16 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
+
+	//////////////////////////////////Do Loop///////////////////////////
+
 	do{
 		// glfwGetTime is called only once, the first time this function is called
 		static double lastTime = glfwGetTime();
 
 		// Compute time difference between current and last frame
 		double currentTime = glfwGetTime();
-		float deltaTime = float(currentTime - lastTime) / 1000000000;
+		float deltaTime = float(currentTime - lastTime) / 2;
 	
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,11 +253,57 @@ int main( void )
 		{
 			
 			Entity* current = wave1[i];
-			current->moveY(vertices, deltaTime);
+			current->moveY(vertices, -deltaTime);
 			int currentPos = current->getBufferPosition();
 			int len = current->getLengthInBuffer();
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 			
+		}
+
+		if (bullets.size() > 0){
+			for (int i = 0; i < bullets.size(); i++)
+			{
+				if (float age = bullets[i]->getLifeSpan() > 2.0)
+				{
+					bullets.erase(bullets.begin()+i);
+				}
+			}
+
+			for (int i = 0; i < bullets.size(); i++)
+			{
+				Entity* current = bullets[i];
+				current->moveY(vertices, deltaTime);
+				int currentPos = current->getBufferPosition();
+				int len = current->getLengthInBuffer();
+				//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+			}
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+		{
+			player->moveX(vertices, -deltaTime);
+			int currentPos = player->getBufferPosition();
+			int len = player->getLengthInBuffer();
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+		{
+			player->moveX(vertices, deltaTime);
+			int currentPos = player->getBufferPosition();
+			int len = player->getLengthInBuffer();
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
+		{
+			if (bullets.size() < 3) {
+				if (bullets.size() > 0) {
+					if (bullets.back()->getLifeSpan() < 1)
+						continue;
+				}
+				bullets.push_back(addBullet(vertices,uvs,normals,glm::vec3(0,8.0f,0.0f)));
+			}
 		}
 
 		// Compute the MVP matrix from keyboard and mouse input
