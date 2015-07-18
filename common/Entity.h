@@ -15,7 +15,8 @@ public:
 		char * objPath, //path to .obj file
 		glm::vec3 location, //location to place object
 		int textureRow,
-		int textureColumn
+		int textureColumn,
+		float speed
 		);
 
 	~Entity(void);
@@ -35,7 +36,7 @@ public:
 
 	void moveX();
 
-	void moveY(std::vector<glm::vec3> & vertexBuffer, float distance);
+	void moveY(std::vector<glm::vec3> & vertexBuffer, float time);
 
 	void setTexture(
 		int row, 

@@ -54,8 +54,9 @@ Entity* addPlayer (int numOfLives,
 		normalBuffer,				//normal buffer
 		"Player2.obj",				//object file
 		glm::vec3(0.0f,4.0f,0.0f),	//location on screen
-		7,							//texture row
-		7							//texture column
+		2,							//texture row
+		0,							//texture column
+		3.0
 		);
 	return player;
 };
@@ -72,8 +73,9 @@ Entity* addTurtle (
 		normalBuffer,				//normal buffer
 		"Player2.obj",				//object file
 		location,					//location on screen
-		7,							//texture row
-		1	);
+		0,							//texture row
+		0,
+		2.0f);
 
 	return turtle;
 }
@@ -137,7 +139,7 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Load the texture
-	GLuint Texture = loadBMP_custom("Images/TextureDump2.bmp");
+	GLuint Texture = loadBMP_custom("Images/WorkingTextures.bmp");
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
@@ -172,16 +174,6 @@ int main( void )
 		wave1.push_back(addTurtle(vertices,uvs,normals,glm::vec3(-13.0+(2*i),30.0f,0.0f)));
 	}
 
-	for (int i = 0; i < wave1.size(); i++)
-		{
-			Entity* current = wave1[i];
-			current->moveY(vertices, -5.0);
-			int currentPos = current->getBufferPosition();
-			int len = current->getLengthInBuffer();
-			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
-		}
-
 	//-------------------------------------------------------------------------------
 
 
@@ -204,7 +196,7 @@ int main( void )
 
 		// Compute time difference between current and last frame
 		double currentTime = glfwGetTime();
-		float deltaTime = float(currentTime - lastTime);
+		float deltaTime = float(currentTime - lastTime) / 1000000000;
 	
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -215,9 +207,9 @@ int main( void )
 		//move enemy waves
 		for (int i = 0; i < wave1.size(); i++)
 		{
-			static float distance = -10.0 * deltaTime *100;
+			
 			Entity* current = wave1[i];
-			current->moveY(vertices, distance);
+			current->moveY(vertices, deltaTime);
 			int currentPos = current->getBufferPosition();
 			int len = current->getLengthInBuffer();
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;

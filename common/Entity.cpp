@@ -20,7 +20,7 @@
 int position;
 int vertexCount;
 int hitpoints;
-int speed;
+int mySpeed;
 int currentTextureRow, currentTextureCol;
 
 Entity::Entity(
@@ -30,7 +30,8 @@ Entity::Entity(
 	char * objPath, 
 	glm::vec3 location,
 	int textureRow,
-	int textureColumn)
+	int textureColumn,
+	float speed)
 {
 	//save references to buffers
 	//save index of first vertex
@@ -53,7 +54,7 @@ Entity::Entity(
 	hitpoints = 1;
 
 	//set speed
-	speed = 1;
+	mySpeed = speed;
 
 	//set texture
 	currentTextureRow = textureRow;
@@ -99,10 +100,10 @@ void Entity::moveX()
 {
 }
 
-void Entity::moveY(std::vector<glm::vec3> & vertexBuffer, float distance)
+void Entity::moveY(std::vector<glm::vec3> & vertexBuffer, float time)
 {
 	glm::vec4 point;
-	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,distance,0.0f));
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,(speed*time),0.0f));
 	for (int i = position; i < (position + vertexCount); i++)
 	{
 		point = glm::vec4(vertexBuffer[i], 1.0f);

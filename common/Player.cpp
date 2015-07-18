@@ -14,14 +14,16 @@ Player::Player(
 	char * objPath, //path to .obj file
 	glm::vec3 location, //location to place object
 	int textureRow,
-	int textureColumn): Entity(
+	int textureColumn,
+	float speed): Entity(
 	vertexBuffer,
 	uvBuffer,
 	normalBuffer, //textureBuffer
 	objPath, //path to .obj file
 	location, //location to place object
 	textureRow,
-	textureColumn)
+	textureColumn,
+	speed)
 {
 	lives = numOfLives;
 }

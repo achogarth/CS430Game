@@ -15,7 +15,8 @@ public:
 		char * objPath, //path to .obj file
 		glm::vec3 location, //location to place object
 		int textureRow,
-		int textureColumn);
+		int textureColumn,
+		float speed);
 
 	~Player();
 
