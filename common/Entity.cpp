@@ -1,4 +1,11 @@
 #include "Entity.h"
+
+// Include GLEW
+#include <GL/glew.h>
+
+// Include GLFW
+#include <glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
@@ -6,6 +13,8 @@
 #include <cstring>
 #include <common/objloader.hpp>
 
+#include <iostream>
+#include <glm\gtx\string_cast.hpp>
 //using namespace glm;
 
 int position;
@@ -92,10 +101,17 @@ void Entity::moveX()
 
 void Entity::moveY(std::vector<glm::vec3> & vertexBuffer, float distance)
 {
-	for (int i = position; i < position + vertexCount; i++)
+	glm::vec4 point;
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,distance,0.0f));
+	for (int i = position; i < (position + vertexCount); i++)
 	{
-		vertexBuffer[i].y += distance;
+		point = glm::vec4(vertexBuffer[i], 1.0f);
+		point = trans * point;
+		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
+		vertexBuffer[i] = glm::vec3(point.x,point.y,point.z);
+		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
 	}
+
 }
 
 void Entity::setTexture(

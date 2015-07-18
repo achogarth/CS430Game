@@ -163,21 +163,24 @@ int main( void )
 	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
 	glm::vec4 point1 = glm::vec4(1.0f);
-	player->getLocation(vertices,point1); // problems with this method call
+	//player->getLocation(vertices,point1); // problems with this method call
 	std::cout<< glm::to_string(point1)<< std::endl;
 
 	std::vector<Entity*> wave1;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		wave1.push_back(addTurtle(vertices,uvs,normals,glm::vec3(-13.0+(2*i),30.0f,0.0f)));
 	}
 
 	for (int i = 0; i < wave1.size(); i++)
-	{
-		Entity* current = wave1[i];
-		current->moveY(vertices, -1.0);
-	}
-	
+		{
+			Entity* current = wave1[i];
+			current->moveY(vertices, -5.0);
+			int currentPos = current->getBufferPosition();
+			int len = current->getLengthInBuffer();
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
+		}
 
 	//-------------------------------------------------------------------------------
 
@@ -196,12 +199,30 @@ int main( void )
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
 	do{
+		// glfwGetTime is called only once, the first time this function is called
+		static double lastTime = glfwGetTime();
 
+		// Compute time difference between current and last frame
+		double currentTime = glfwGetTime();
+		float deltaTime = float(currentTime - lastTime);
+	
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Use our shader
 		glUseProgram(programID);
+
+		//move enemy waves
+		for (int i = 0; i < wave1.size(); i++)
+		{
+			static float distance = -10.0 * deltaTime *100;
+			Entity* current = wave1[i];
+			current->moveY(vertices, distance);
+			int currentPos = current->getBufferPosition();
+			int len = current->getLengthInBuffer();
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+			
+		}
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
@@ -223,6 +244,7 @@ int main( void )
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
 		glVertexAttribPointer(
 			0,                  // attribute
 			3,                  // size
@@ -253,6 +275,8 @@ int main( void )
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		lastTime = currentTime;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
