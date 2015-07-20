@@ -28,7 +28,7 @@ public:
 
 	virtual bool collide(); //virtual makes this abstract
 
-	virtual void move();
+	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
 	int getBufferPosition();
 
@@ -44,9 +44,11 @@ public:
 		std::vector<glm::vec2> & textureBuffer
 	);// integer between 0 and 7 for row, col to pick the
 
-	void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point);
+	void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & point);
 
 	double getLifeSpan(void);
+
+	void destroy(std::vector<glm::vec3> & vertexBuffer);
 
 private:
 	int position;
