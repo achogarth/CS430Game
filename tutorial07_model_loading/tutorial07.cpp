@@ -75,7 +75,7 @@ Entity* addSpiral (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		1.0f);
+		1.5f);
 
 	return spiral;
 }
@@ -94,7 +94,7 @@ Entity* addEgg (
 		location,					//location on screen
 		0,							//texture row
 		1,
-		1.0f);
+		1.5f);
 
 	return egg;
 }
@@ -202,7 +202,7 @@ int main( void )
 
 	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
-	glm::vec4 point1 = glm::vec4(1.0f);
+	glm::vec3 point1 = glm::vec3(1.0f);
 
 	std::vector<Entity*> wave1;
 	for (int i = 0; i < 15; i++)
@@ -215,6 +215,9 @@ int main( void )
 	}
 
 	std::vector<Entity*> bullets;
+	player->getLocation(vertices,point1);
+	bullets.push_back(addBullet(vertices,uvs,normals,glm::vec3(point1.x,point1.y+2,0.0f)));
+
 	//-------------------------------------------------------------------------------
 
 
@@ -251,59 +254,43 @@ int main( void )
 		//move enemy waves
 		for (int i = 0; i < wave1.size(); i++)
 		{
-			
 			Entity* current = wave1[i];
 			current->moveY(vertices, -deltaTime);
 			int currentPos = current->getBufferPosition();
 			int len = current->getLengthInBuffer();
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
-			
-		}
-
-		if (bullets.size() > 0){
-			for (int i = 0; i < bullets.size(); i++)
-			{
-				if (float age = bullets[i]->getLifeSpan() > 2.0)
-				{
-					bullets.erase(bullets.begin()+i);
-				}
-			}
-
-			for (int i = 0; i < bullets.size(); i++)
-			{
-				Entity* current = bullets[i];
-				current->moveY(vertices, deltaTime);
-				int currentPos = current->getBufferPosition();
-				int len = current->getLengthInBuffer();
-				//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
-			}
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
 		{
-			player->moveX(vertices, -deltaTime);
-			int currentPos = player->getBufferPosition();
-			int len = player->getLengthInBuffer();
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x > -19.0f)
+			{
+				player->moveX(vertices, -deltaTime);
+				int currentPos = player->getBufferPosition();
+				int len = player->getLengthInBuffer();
+			}
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
 		{
-			player->moveX(vertices, deltaTime);
-			int currentPos = player->getBufferPosition();
-			int len = player->getLengthInBuffer();
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x < 19.0f){
+				player->moveX(vertices, deltaTime);
+				int currentPos = player->getBufferPosition();
+				int len = player->getLengthInBuffer();
+			}
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
 		{
-			if (bullets.size() < 3) {
-				if (bullets.size() > 0) {
-					if (bullets.back()->getLifeSpan() < 1)
-						continue;
-				}
-				bullets.push_back(addBullet(vertices,uvs,normals,glm::vec3(0,8.0f,0.0f)));
-			}
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices, point1);
+			bullets[0]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
 		}
 
 		// Compute the MVP matrix from keyboard and mouse input

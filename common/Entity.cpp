@@ -12,6 +12,7 @@
 #include <string>
 #include <cstring>
 #include <common/objloader.hpp>
+#include <algorithm>
 
 #include <iostream>
 #include <glm\gtx\string_cast.hpp>
@@ -86,8 +87,27 @@ bool Entity::collide()
 	return false;
 }
 
-void Entity::move()
+void Entity::move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location)
 {
+	glm::vec4 point;
+	//get center of object
+	glm::vec3 center = glm::vec3(1.0f);
+	getLocation(vertexBuffer,center);
+
+	//create translation to move to origin
+	glm::mat4 toOrigin = glm::translate(glm::mat4(1.0f),-center);
+
+	//create translation to destination
+	glm::mat4 toDest = glm::translate(glm::mat4(1.0f),location);
+	
+	for (int i = position; i < (position + vertexCount); i++)
+	{
+		point = glm::vec4(vertexBuffer[i], 1.0f);
+		point = toDest * toOrigin * point;
+		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
+		vertexBuffer[i] = glm::vec3(point.x,point.y+2,point.z);
+		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
+	}
 }
 
 int Entity::getBufferPosition()
@@ -102,12 +122,18 @@ int Entity::getLengthInBuffer()
 
 void Entity::moveX(std::vector<glm::vec3> & vertexBuffer, float time)
 {
+
 	glm::vec4 point;
 	glm::mat4 trans = glm::translate(glm::mat4(1.0f),glm::vec3((mySpeed*time),0.0f,0.0f));
 	for (int i = position; i < (position + vertexCount); i++)
 	{
+
 		point = glm::vec4(vertexBuffer[i], 1.0f);
+		float currentX = point.x;
 		point = trans * point;
+
+		
+
 		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
 		vertexBuffer[i] = glm::vec3(point.x,point.y,point.z);
 		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
@@ -152,7 +178,7 @@ void Entity::setTexture(
 	
 }
 
-void Entity::getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point)
+void Entity::getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & point)
 {
 	//calculate center of entity and return the center point
 	
@@ -198,11 +224,21 @@ void Entity::getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & poin
 	point.x = x;
 	point.y = y;
 	point.z = 0.0f;
-	point.w = 1.0f;
 
 }
 
 double Entity::getLifeSpan(void)
 {
 	return glfwGetTime() - creationTime;
+}
+
+void Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
+{
+	glm::vec3 point = glm::vec3(0.0f,-10.0f,0.0f);
+	for (int i = position; i < (position + vertexCount); i++)
+	{
+		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
+		vertexBuffer[i] = point;
+		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
+	}
 }
