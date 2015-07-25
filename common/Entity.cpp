@@ -24,6 +24,7 @@ int hitpoints;
 int mySpeed;
 int currentTextureRow, currentTextureCol;
 double creationTime;
+bool active;
 
 Entity::Entity(
 	std::vector<glm::vec3> & vertexBuffer, 
@@ -65,6 +66,7 @@ Entity::Entity(
 
 	//set creationtime
 	creationTime = glfwGetTime();
+	active = true;
 }
 
 
@@ -242,3 +244,41 @@ void Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
 		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
 	}
 }
+
+void Entity::scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale)
+{
+	glm::vec4 point;
+
+	//create scale matrix
+	glm::mat4 s = glm::scale(glm::mat4(1.0f),scale);
+	
+	//get center of object
+	glm::vec3 center = glm::vec3(1.0f);
+	getLocation(vertexBuffer,center);
+
+	//create translation to move to origin
+	glm::mat4 toOrigin = glm::translate(glm::mat4(1.0f),-center);
+	glm::mat4 reset = glm::translate(glm::mat4(1.0f),center);
+	
+	for (int i = position; i < (position + vertexCount); i++)
+	{
+		point = glm::vec4(vertexBuffer[i], 1.0f);
+		point = reset * s * toOrigin * point;
+		vertexBuffer[i] = glm::vec3(point.x,point.y+2,point.z);
+	}
+}
+
+void Entity::activate()
+{
+	active = true;
+}
+
+void Entity::deactivate(std::vector<glm::vec3> & vertexBuffer)
+{
+	active = false;
+
+	//move to inactive area (0,-10,0)
+	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
+}
+
+bool Entity::isActive(void){ return active; }
