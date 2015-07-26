@@ -350,13 +350,13 @@ int main( void )
 			else
 			{
 
-				if ((currentTime - bulletTime) > 0.5){
+				if ((currentTime - bulletTime) > 0.3){
 					//put bullet above player
 					point1 = glm::vec3(1.0f);
 					player->getLocation(vertices, point1);
 					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
 					bullets[nextBullet]->activate();
-					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC|SND_NOSTOP);
+					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
 					nextBullet = (nextBullet + 1) % bullets.size();
 					bulletTime = currentTime;
 				}

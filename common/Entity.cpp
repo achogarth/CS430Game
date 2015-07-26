@@ -281,4 +281,9 @@ void Entity::deactivate(std::vector<glm::vec3> & vertexBuffer)
 	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
 }
 
+void Entity::deactivate()
+{
+	active = false;
+}
+
 bool Entity::isActive(void){ return active; }

@@ -56,6 +56,8 @@ public:
 
 	void deactivate(std::vector<glm::vec3> & vertexBuffer);
 
+	void deactivate();
+
 	bool isActive(void);
 
 private:
