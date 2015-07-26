@@ -148,7 +148,7 @@ void setupBullets (int count)
 	for (int i = 0; i < bullets.size(); i ++)
 	{
 		//deactivate bullets
-		bullets[i]->deactivate(vertices);	
+		bullets[i]->destroy(vertices);	
 	}
 	nextBullet = 0;
 }
@@ -233,7 +233,7 @@ int main( void )
 
 	// Load it into a VBO
 
-	/*GLuint vertexbuffer;
+	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
@@ -306,18 +306,13 @@ int main( void )
 	}
 	while( glfwGetKey(window, GLFW_KEY_SPACE ) != GLFW_PRESS);
 
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
-	glDeleteProgram(programID);
-	glDeleteTextures(1, &TextureID);
-	glDeleteVertexArrays(1, &VertexArrayID);*/
 
 	/*************************************************************
 						Level One Setup
 	**************************************************************/
 
 	
-
+	//clear buffer vextors
 	vertices.clear();
 	uvs.clear();
 	normals.clear();
@@ -352,7 +347,7 @@ int main( void )
 		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
 	}
 
-	setupBullets(5);
+	setupBullets(3);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -360,12 +355,12 @@ int main( void )
 
 	// Load it into a VBO
 
-	GLuint vertexbuffer;
+	//GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint uvbuffer;
+	//GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
@@ -394,9 +389,13 @@ int main( void )
 			Entity* current = wave1[i];
 			if (current->isActive())
 			{
+
 				current->moveY(vertices, -deltaTime);
 				int currentPos = current->getBufferPosition();
 				int len = current->getLengthInBuffer();
+
+				//check for collision
+				current->collide(vertices, bullets, player);
 			}
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
@@ -434,7 +433,7 @@ int main( void )
 				bullets[i]->getLocation(vertices,point1);
 				if (point1.y > 29.0f)
 				{
-					bullets[i]->deactivate(vertices);
+					bullets[i]->destroy(vertices);
 				}
 			}
 		}
@@ -450,7 +449,7 @@ int main( void )
 			else
 			{
 
-				if ((currentTime - bulletTime) > 0.3){
+				if ((currentTime - bulletTime) > 0.2){
 					//put bullet above player
 					point1 = glm::vec3(1.0f);
 					player->getLocation(vertices, point1);

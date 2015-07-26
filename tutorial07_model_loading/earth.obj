@@ -14,10 +14,11 @@ v -20 0 0
 v 20 0 0
 
 #Player textures
-vt 0.75  0.875
-vt 0.875 0.875
-vt 0.75 1
-vt 0.875 1
+
+vt 0 1
+vt 1 1
+vt 0  0.875
+vt 1 0.875
 
 
 #normal

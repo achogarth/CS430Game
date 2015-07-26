@@ -24,7 +24,5 @@ public:
 
 	int removeLife(); // decrements current lives and returns remaining lives
 
-	bool collide(); // returns true if the player has no lives remaining
-
-	void move();
+	bool destroy(std::vector<glm::vec3> & vertexBuffer);
 };

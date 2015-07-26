@@ -40,13 +40,10 @@ int Player::removeLife()
 		return 0;
 }
 
-bool Player::collide(){
-	if (removeLife() == 0)
+bool Player::destroy(std::vector<glm::vec3> & vertexBuffer)
+{
+	if (removeLife() < 1)
 	{
-		return true;
-	}
-	
-	return false;
-}
 
-void Player::move(){}
+	}
+}

@@ -26,7 +26,7 @@ public:
 		std::vector<glm::vec2> & out_uvs,
 		std::vector<glm::vec3> & out_normals);
 
-	virtual bool collide(); //virtual makes this abstract
+	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player); //virtual makes this abstract
 
 	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
@@ -48,15 +48,13 @@ public:
 
 	double getLifeSpan(void);
 
-	void destroy(std::vector<glm::vec3> & vertexBuffer);
+	bool destroy(std::vector<glm::vec3> & vertexBuffer);
 
 	void scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale);
 
 	void activate();
 
-	void deactivate(std::vector<glm::vec3> & vertexBuffer);
-
-	void deactivate();
+	void deactivate(void);
 
 	bool isActive(void);
 
