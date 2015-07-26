@@ -4,7 +4,11 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 #include <vector>
+#include <common/Entity.h>
+#include <common\Player.h>
+#include <Windows.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -16,6 +20,7 @@ GLFWwindow* window;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm\gtx\string_cast.hpp>
 using namespace glm;
 
 #include <common/shader.hpp>
@@ -23,6 +28,139 @@ using namespace glm;
 #include <common/controls.hpp>
 #include <common/objloader.hpp>
 
+
+
+/*************************************************************
+To Do: (! indicates done, % indicates partial completion)
+-!	Add method definitions for creating player;
+-%	Add method definitions for each type of enemy 
+	(this will allow a simple method call to set speed, 
+	movement, etc without having to manually set for 
+	each of that enemy type);
+-	Add second do loop for second level;
+-	Remove superfluous tutorial 7 code
+**************************************************************/
+
+
+
+/*************************************************************
+						global variables
+**************************************************************/
+std::vector<glm::vec3> vertices;
+std::vector<glm::vec2> uvs;
+std::vector<glm::vec3> normals;
+
+std::vector<Entity*> bullets;
+
+bool white = false;
+int nextBullet;
+///////////////////////////////////////////////////////////////
+
+
+
+
+
+/*************************************************************
+						helper methods
+**************************************************************/
+Entity* addPlayer (int numOfLives,
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer) //textureBuffer
+{
+	Entity* player = new Player(
+		4,							//number of lives
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		glm::vec3(0.0f,4.0f,0.0f),	//location on screen
+		2,							//texture row
+		0,							//texture column
+		20.0
+		);
+	return player;
+};
+
+Entity* addSpiral (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* spiral = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		0,
+		1.5f);
+
+	return spiral;
+}
+
+Entity* addEgg (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* egg = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		1,
+		1.5f);
+
+	return egg;
+}
+
+Entity* addBullet (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* bullet = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		4,							//texture row
+		2,
+		30.0f);
+
+	return bullet;
+}
+
+void setupBullets (int count)
+{
+	//add three bullets to bullet pool
+	for (int i = 0; i < count; i++){
+		bullets.push_back(addBullet(vertices,uvs,normals,glm::vec3(1.0f)));
+	}
+	for (int i = 0; i < bullets.size(); i ++)
+	{
+		//deactivate bullets
+		bullets[i]->deactivate(vertices);	
+	}
+	nextBullet = 0;
+}
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+/*************************************************************
+						Main method
+**************************************************************/
 int main( void )
 {
 	// Initialise GLFW
@@ -38,7 +176,7 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1024, 768, "Tutorial 07 - Model Loading", NULL, NULL);
+	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -58,7 +196,8 @@ int main( void )
 	glfwSetCursorPos(window, 1024/2, 768/2);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
+	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -79,20 +218,45 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Load the texture
-	GLuint Texture = loadBMP_custom("Images/Master.bmp");
+	GLuint Texture = loadBMP_custom("Images/WorkingTextures.bmp");
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-
-	// Read our .obj file
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals; // Won't be used at the moment.
 	
+
+	/*************************************************************
+						Level One Setup
+	**************************************************************/
+
+	//add earth and stretch out
 	bool res;
-	res = loadOBJ("Player.obj", vertices, uvs, normals);
-	//res = loadOBJ("Bad1.obj", vertices, uvs, normals);
-	//res = loadOBJ("Bad2.obj", vertices, uvs, normals);
+	res = loadOBJ("earth.obj", vertices, uvs, normals);
+	glm::mat4 stretch = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f,3.0f,1.0f));
+	for (int i = 0; i< vertices.size();i++){
+		glm::vec4 point = glm::vec4(vertices[i],1.0f);
+		point = stretch * point;
+		vertices[i] = glm::vec3(point.x, point.y, point.z);
+	}
+
+	//add player model
+	Entity* player = addPlayer(4, vertices, uvs, normals);
+	glm::vec3 point1 = glm::vec3(1.0f);
+
+	std::vector<Entity*> wave1;
+	for (int i = 0; i < 15; i++)
+	{
+		
+		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
+		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
+		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
+		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
+	}
+
+	setupBullets(5);
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 	// Load it into a VBO
 
@@ -106,13 +270,98 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
-	do{
 
+	//////////////////////////////////Do Loop///////////////////////////
+
+	do{
+		// glfwGetTime is called only once, the first time this function is called
+		static double lastTime = glfwGetTime();
+		static double bulletTime = lastTime;
+
+		// Compute time difference between current and last frame
+		double currentTime = glfwGetTime();
+		float deltaTime = float(currentTime - lastTime) / 2;
+	
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Use our shader
 		glUseProgram(programID);
+
+		//move enemy waves
+		for (int i = 0; i < wave1.size(); i++)
+		{
+			Entity* current = wave1[i];
+			if (current->isActive())
+			{
+				current->moveY(vertices, -deltaTime);
+				int currentPos = current->getBufferPosition();
+				int len = current->getLengthInBuffer();
+			}
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+		{
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x > -19.0f)
+			{
+				player->moveX(vertices, -deltaTime);
+				int currentPos = player->getBufferPosition();
+				int len = player->getLengthInBuffer();
+			}
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+		{
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x < 19.0f){
+				player->moveX(vertices, deltaTime);
+				int currentPos = player->getBufferPosition();
+				int len = player->getLengthInBuffer();
+			}
+			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
+		}
+
+		//move and deactivate bullets
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			if (bullets[i]->isActive()){
+				bullets[i]->moveY(vertices,deltaTime);
+				bullets[i]->getLocation(vertices,point1);
+				if (point1.y > 29.0f)
+				{
+					bullets[i]->deactivate(vertices);
+				}
+			}
+		}
+
+		//
+		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
+		{
+			if (bullets[nextBullet]->isActive())
+			{
+				//bullet limit reached
+				//do nothing
+			}
+			else
+			{
+
+				if ((currentTime - bulletTime) > 0.5){
+					//put bullet above player
+					point1 = glm::vec3(1.0f);
+					player->getLocation(vertices, point1);
+					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
+					bullets[nextBullet]->activate();
+					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC|SND_NOSTOP);
+					nextBullet = (nextBullet + 1) % bullets.size();
+					bulletTime = currentTime;
+				}
+			}
+		}
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
@@ -134,6 +383,7 @@ int main( void )
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
 		glVertexAttribPointer(
 			0,                  // attribute
 			3,                  // size
@@ -165,6 +415,8 @@ int main( void )
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
+		lastTime = currentTime;
+
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
@@ -180,29 +432,4 @@ int main( void )
 	glfwTerminate();
 
 	return 0;
-}/*
-
-class Player{
-
-	int location;
-	int end;
-
-	Player(int loc){
-		location = loc;
-		end = loc + 18;
-	}
-	
 }
-
-class Bad1{
-
-
-
-}
-
-class Bad2{
-
-
-
-}
-*/
