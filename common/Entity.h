@@ -48,7 +48,7 @@ public:
 
 	double getLifeSpan(void);
 
-	bool destroy(std::vector<glm::vec3> & vertexBuffer);
+	void destroy(std::vector<glm::vec3> & vertexBuffer);
 
 	void scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale);
 
