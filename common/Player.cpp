@@ -40,10 +40,11 @@ int Player::removeLife()
 		return 0;
 }
 
-bool Player::destroy(std::vector<glm::vec3> & vertexBuffer)
+/*bool Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
 {
 	if (removeLife() < 1)
 	{
-
+		return true;
 	}
-}
+	return false;
+}*/

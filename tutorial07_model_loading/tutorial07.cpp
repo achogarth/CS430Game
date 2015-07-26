@@ -96,7 +96,7 @@ Entity* addSpiral (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		1.5f);
+		2.0f);
 
 	return spiral;
 }
@@ -115,7 +115,7 @@ Entity* addEgg (
 		location,					//location on screen
 		0,							//texture row
 		1,
-		1.5f);
+		2.0f);
 
 	return egg;
 }
@@ -152,6 +152,18 @@ void setupBullets (int count)
 	}
 	nextBullet = 0;
 }
+
+//splash screen method
+
+//stage 2 prep method
+
+//lose screen method
+
+//win screen method
+
+//level one method
+
+//level two method
 
 ///////////////////////////////////////////////////////////////
 
