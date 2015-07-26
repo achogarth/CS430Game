@@ -148,7 +148,7 @@ void setupBullets (int count)
 	for (int i = 0; i < bullets.size(); i ++)
 	{
 		//deactivate bullets
-		bullets[i]->deactivate(vertices);	
+		bullets[i]->destroy(vertices);	
 	}
 	nextBullet = 0;
 }
@@ -216,27 +216,122 @@ int main( void )
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	
+	
 
-	// Load the texture
-	GLuint Texture = loadBMP_custom("Images/WorkingTextures.bmp");
+	/*************************************************************
+						Start Screen Setup
+	**************************************************************/
+
+	GLuint Texture = loadBMP_custom("Images/Splash.bmp");
+
 	
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 	
+	loadOBJ("Splash.obj", vertices, uvs, normals);
+
+	// Load it into a VBO
+
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+
+	do
+	{
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Use our shader
+		glUseProgram(programID);
+
+		// Compute the MVP matrix from keyboard and mouse input
+		computeMatricesFromInputs();
+		glm::mat4 ProjectionMatrix = getProjectionMatrix();
+		glm::mat4 ViewMatrix = getViewMatrix();
+		glm::mat4 ModelMatrix = glm::mat4(1.0);
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
+		// Send our transformation to the currently bound shader, 
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i(TextureID, 0);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// 2nd attribute buffer : UVs
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glVertexAttribPointer(
+			1,                                // attribute
+			2,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
+
+		// Draw the triangle !
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+
+	}
+	while( glfwGetKey(window, GLFW_KEY_SPACE ) != GLFW_PRESS);
+
 
 	/*************************************************************
 						Level One Setup
 	**************************************************************/
 
+	
+	//clear buffer vextors
+	vertices.clear();
+	uvs.clear();
+	normals.clear();
+
+	// Load the texture
+	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
+	
+	// Get a handle for our "myTextureSampler" uniform
+	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+
 	//add earth and stretch out
 	bool res;
 	res = loadOBJ("earth.obj", vertices, uvs, normals);
-	glm::mat4 stretch = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f,3.0f,1.0f));
+	/*glm::mat4 stretch = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f,3.0f,1.0f));
 	for (int i = 0; i< vertices.size();i++){
 		glm::vec4 point = glm::vec4(vertices[i],1.0f);
 		point = stretch * point;
 		vertices[i] = glm::vec3(point.x, point.y, point.z);
-	}
+	}*/
 
 	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
@@ -252,7 +347,7 @@ int main( void )
 		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
 	}
 
-	setupBullets(5);
+	setupBullets(3);
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
@@ -260,12 +355,12 @@ int main( void )
 
 	// Load it into a VBO
 
-	GLuint vertexbuffer;
+	//GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint uvbuffer;
+	//GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
@@ -294,9 +389,13 @@ int main( void )
 			Entity* current = wave1[i];
 			if (current->isActive())
 			{
+
 				current->moveY(vertices, -deltaTime);
 				int currentPos = current->getBufferPosition();
 				int len = current->getLengthInBuffer();
+
+				//check for collision
+				current->collide(vertices, bullets, player);
 			}
 			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
@@ -334,7 +433,7 @@ int main( void )
 				bullets[i]->getLocation(vertices,point1);
 				if (point1.y > 29.0f)
 				{
-					bullets[i]->deactivate(vertices);
+					bullets[i]->destroy(vertices);
 				}
 			}
 		}
@@ -350,13 +449,13 @@ int main( void )
 			else
 			{
 
-				if ((currentTime - bulletTime) > 0.5){
+				if ((currentTime - bulletTime) > 0.2){
 					//put bullet above player
 					point1 = glm::vec3(1.0f);
 					player->getLocation(vertices, point1);
 					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
 					bullets[nextBullet]->activate();
-					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC|SND_NOSTOP);
+					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
 					nextBullet = (nextBullet + 1) % bullets.size();
 					bulletTime = currentTime;
 				}

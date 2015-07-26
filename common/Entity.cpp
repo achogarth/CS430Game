@@ -84,8 +84,56 @@ bool Entity::loadObject(const char * path,
 	return loadOBJ(path, out_vertices, out_uvs, out_normals);
 }
 
-bool Entity::collide()
+bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player)
 {
+	if (active){
+		//get center of this item
+		glm::vec3 self = glm::vec3(1.0f);
+		getLocation(vertexBuffer, self);
+
+		glm::vec3 other = glm::vec3(1.0f);
+
+		float dx, dy, distance;
+
+		//check bullet collisions
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			//get center of bullet
+			bullets[i]->getLocation(vertexBuffer, other);
+			
+			dx = self.x - other.x;
+			dy = self.y - other.y;
+
+			distance = sqrt(dx * dx + dy * dy);
+
+			if (distance < 1.5)
+			{
+				//collision
+				destroy(vertexBuffer);
+				bullets[i]->destroy(vertexBuffer);
+				return true;
+			}
+		}
+
+		//check player collisions
+		player->getLocation(vertexBuffer,other);
+
+		dx = self.x - other.x;
+		dy = self.y - other.y;
+
+		distance = sqrt(dx * dx + dy * dy);
+
+		if (distance < 1.5)
+		{
+			//collision
+			destroy(vertexBuffer);
+			player->destroy(vertexBuffer);
+			return true;
+		}
+
+		//check ground collision
+
+	}
 	return false;
 }
 
@@ -236,13 +284,10 @@ double Entity::getLifeSpan(void)
 
 void Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
 {
-	glm::vec3 point = glm::vec3(0.0f,-10.0f,0.0f);
-	for (int i = position; i < (position + vertexCount); i++)
-	{
-		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
-		vertexBuffer[i] = point;
-		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
-	}
+	active = false;
+
+	//move to inactive area (0,-10,0)
+	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
 }
 
 void Entity::scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale)
@@ -273,12 +318,10 @@ void Entity::activate()
 	active = true;
 }
 
-void Entity::deactivate(std::vector<glm::vec3> & vertexBuffer)
+void Entity::deactivate()
 {
 	active = false;
-
-	//move to inactive area (0,-10,0)
-	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
 }
 
 bool Entity::isActive(void){ return active; }
+
