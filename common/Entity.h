@@ -28,13 +28,13 @@ public:
 
 	virtual bool collide(); //virtual makes this abstract
 
-	virtual void move();
+	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
 	int getBufferPosition();
 
 	int getLengthInBuffer();
 
-	void moveX();
+	void moveX(std::vector<glm::vec3> & vertexBuffer, float time);
 
 	void moveY(std::vector<glm::vec3> & vertexBuffer, float time);
 
@@ -44,13 +44,26 @@ public:
 		std::vector<glm::vec2> & textureBuffer
 	);// integer between 0 and 7 for row, col to pick the
 
-	//this method has problems passing the vec4
-	void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec4 & point);
+	void getLocation(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & point);
+
+	double getLifeSpan(void);
+
+	void destroy(std::vector<glm::vec3> & vertexBuffer);
+
+	void scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale);
+
+	void activate();
+
+	void deactivate(std::vector<glm::vec3> & vertexBuffer);
+
+	bool isActive(void);
 
 private:
 	int position;
 	int length;
 	int hitpoints;
-	int speed;
+	int mySpeed;
+	double creationTime;
+	bool active;
 };
 
