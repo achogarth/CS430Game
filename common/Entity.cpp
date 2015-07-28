@@ -84,7 +84,7 @@ bool Entity::loadObject(const char * path,
 	return loadOBJ(path, out_vertices, out_uvs, out_normals);
 }
 
-bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player)
+bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int enemyCount)
 {
 	if (active){
 		//get center of this item
@@ -110,6 +110,7 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			{
 				//collision
 				destroy(vertexBuffer);
+				enemyCount--;
 				bullets[i]->destroy(vertexBuffer);
 				return true;
 			}
