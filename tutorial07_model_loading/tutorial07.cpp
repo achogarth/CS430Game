@@ -46,6 +46,21 @@ To Do: (! indicates done, % indicates partial completion)
 /*************************************************************
 						global variables
 **************************************************************/
+#define START "Images/Splash.bmp"
+#define LOSE "Images/LoseScreen.bmp"
+#define WIN "Images/WinScreen.bmp"
+#define STAGE2 "Images/Stage2.bmp"
+
+GLuint Texture;
+GLuint TextureID;
+
+GLuint vertexbuffer;
+GLuint uvbuffer;
+
+GLuint VertexArrayID;
+GLuint programID;
+GLuint MatrixID;
+
 std::vector<glm::vec3> vertices;
 std::vector<glm::vec2> uvs;
 std::vector<glm::vec3> normals;
@@ -54,6 +69,7 @@ std::vector<Entity*> bullets;
 
 bool white = false;
 int nextBullet;
+int enemyCount;
 ///////////////////////////////////////////////////////////////
 
 
@@ -96,7 +112,7 @@ Entity* addSpiral (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		2.0f);
+		1.8f);
 
 	return spiral;
 }
@@ -115,9 +131,47 @@ Entity* addEgg (
 		location,					//location on screen
 		0,							//texture row
 		1,
-		2.0f);
+		1.8f);
 
 	return egg;
+}
+
+Entity* addLotus (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* lotus = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		2,
+		1.8f);
+
+	return lotus;
+}
+
+Entity* addBrain (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* brain = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		3,
+		1.8f);
+
+	return brain;
 }
 
 Entity* addBullet (
@@ -153,110 +207,57 @@ void setupBullets (int count)
 	nextBullet = 0;
 }
 
-//splash screen method
 
-//stage 2 prep method
-
-//lose screen method
-
-//win screen method
-
-//level one method
-
-//level two method
-
-///////////////////////////////////////////////////////////////
-
-
-
-
-/*************************************************************
-						Main method
-**************************************************************/
-int main( void )
+//close program method
+int closeProgram()
 {
-	// Initialise GLFW
-	if( !glfwInit() )
-	{
-		fprintf( stderr, "Failed to initialize GLFW\n" );
-		return -1;
-	}
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	// Cleanup VBO and shader
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+	glDeleteProgram(programID);
+	glDeleteTextures(1, &TextureID);
+	glDeleteVertexArrays(1, &VertexArrayID);
 
-	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
-	if( window == NULL ){
-		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
+	// Close OpenGL window and terminate GLFW
+	glfwTerminate();
 
-	// Initialize GLEW
-	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
+	return 0;
+}
 
-	// Ensure we can capture the escape key being pressed below
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetCursorPos(window, 1024/2, 768/2);
-
-	// Dark blue background
-	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
-	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
-
-	// Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS); 
-
-	// Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
-	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
-
-	// Get a handle for our "MVP" uniform
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-	
-	
-
-	/*************************************************************
-						Start Screen Setup
-	**************************************************************/
-
-	GLuint Texture = loadBMP_custom("Images/Splash.bmp");
+//splash screen method
+void showSplashScreen(char * url)
+{
+	Texture = loadBMP_custom(url);
 
 	
 	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 	
 	loadOBJ("Splash.obj", vertices, uvs, normals);
 
 	// Load it into a VBO
 
-	GLuint vertexbuffer;
+	//GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 
-	GLuint uvbuffer;
+	//GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
+	float startTime = glfwGetTime();
+	float currentTime;
+	float deltaTime;
+
 	do
 	{
+
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - startTime;
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -315,19 +316,122 @@ int main( void )
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
+		if ( glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS && deltaTime > 1.0)
+		{
+			closeProgram();
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_SPACE ) == GLFW_PRESS && deltaTime > 1.0)
+		{
+			//clear buffer vextors
+			vertices.clear();
+			uvs.clear();
+			normals.clear();
+			break;
+
+		}
+
 	}
-	while( glfwGetKey(window, GLFW_KEY_SPACE ) != GLFW_PRESS);
+	while( true );
+
+}
+
+//level one method
+void levelOne()
+{
+	//setup
+
+	//do loop
+
+	//cleanup and next splash screen
+}
+
+//level two method
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+/*************************************************************
+						Main method
+**************************************************************/
+int main( void )
+{
+	// Initialise GLFW
+	if( !glfwInit() )
+	{
+		fprintf( stderr, "Failed to initialize GLFW\n" );
+		return -1;
+	}
+
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// Open a window and create its OpenGL context
+	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
+	if( window == NULL ){
+		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	// Initialize GLEW
+	glewExperimental = true; // Needed for core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Ensure we can capture the escape key being pressed below
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetCursorPos(window, 1024/2, 768/2);
+
+	// Dark blue background
+	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
+	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
+
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS); 
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+	//GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	// Create and compile our GLSL program from the shaders
+	/*GLuint*/ programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+
+	// Get a handle for our "MVP" uniform
+	/*GLuint*/ MatrixID = glGetUniformLocation(programID, "MVP");
+	
+	
+
+	/*************************************************************
+						Start Screen Setup
+	**************************************************************/
+	
+	showSplashScreen(START); // I already moved this on into a method to see how it worked
+
+	//test code for calling the different splash screens
+
+	/*showSplashScreen(LOSE);
+	
+	showSplashScreen(STAGE2);
+
+	showSplashScreen(WIN);*/
 
 
 	/*************************************************************
 						Level One Setup
 	**************************************************************/
-
-	
-	//clear buffer vextors
-	vertices.clear();
-	uvs.clear();
-	normals.clear();
 
 	// Load the texture
 	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
@@ -355,15 +459,12 @@ int main( void )
 		
 		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
 		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
-		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
-		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
+		wave1.push_back(addLotus(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
+		wave1.push_back(addBrain(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
 	}
 
+	enemyCount = wave1.size();
 	setupBullets(3);
-
-	////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 	// Load it into a VBO
 
@@ -376,7 +477,7 @@ int main( void )
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-
+	////////////////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////Do Loop///////////////////////////
 
@@ -395,7 +496,7 @@ int main( void )
 		// Use our shader
 		glUseProgram(programID);
 
-		//move enemy waves
+		//move enemy waves and check for collisions
 		for (int i = 0; i < wave1.size(); i++)
 		{
 			Entity* current = wave1[i];
@@ -403,15 +504,14 @@ int main( void )
 			{
 
 				current->moveY(vertices, -deltaTime);
-				int currentPos = current->getBufferPosition();
-				int len = current->getLengthInBuffer();
 
 				//check for collision
-				current->collide(vertices, bullets, player);
+				current->collide(vertices, bullets, player, enemyCount);
 			}
-			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
 
+
+		//left and right keys
 		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
 		{
 			point1 = glm::vec3(1.0f);
@@ -419,10 +519,7 @@ int main( void )
 			if (point1.x > -19.0f)
 			{
 				player->moveX(vertices, -deltaTime);
-				int currentPos = player->getBufferPosition();
-				int len = player->getLengthInBuffer();
 			}
-			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
@@ -431,10 +528,7 @@ int main( void )
 			player->getLocation(vertices,point1);
 			if (point1.x < 19.0f){
 				player->moveX(vertices, deltaTime);
-				int currentPos = player->getBufferPosition();
-				int len = player->getLengthInBuffer();
 			}
-			//glBufferSubData(GL_ARRAY_BUFFER, currentPos*sizeof(glm::vec3), (len) *sizeof(glm::vec3), &vertices[0]) ;
 		}
 
 		//move and deactivate bullets
@@ -530,7 +624,15 @@ int main( void )
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+		   glfwWindowShouldClose(window) == 0 && enemyCount > 0);
+
+
+	////clear buffer vextors
+	//vertices.clear();
+	//uvs.clear();
+	//normals.clear();
+
+	//showLoseScreen();
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
