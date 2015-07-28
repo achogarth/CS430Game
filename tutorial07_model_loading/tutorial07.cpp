@@ -340,99 +340,6 @@ void showSplashScreen(char * url)
 void levelOne()
 {
 	//setup
-
-	//do loop
-
-	//cleanup and next splash screen
-}
-
-//level two method
-
-///////////////////////////////////////////////////////////////
-
-
-
-
-/*************************************************************
-						Main method
-**************************************************************/
-int main( void )
-{
-	// Initialise GLFW
-	if( !glfwInit() )
-	{
-		fprintf( stderr, "Failed to initialize GLFW\n" );
-		return -1;
-	}
-
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
-	if( window == NULL ){
-		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	// Initialize GLEW
-	glewExperimental = true; // Needed for core profile
-	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
-		return -1;
-	}
-
-	// Ensure we can capture the escape key being pressed below
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetCursorPos(window, 1024/2, 768/2);
-
-	// Dark blue background
-	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
-	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
-
-	// Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS); 
-
-	// Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
-
-	//GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
-	// Create and compile our GLSL program from the shaders
-	/*GLuint*/ programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
-
-	// Get a handle for our "MVP" uniform
-	/*GLuint*/ MatrixID = glGetUniformLocation(programID, "MVP");
-	
-	
-
-	/*************************************************************
-						Start Screen Setup
-	**************************************************************/
-	
-	showSplashScreen(START); // I already moved this on into a method to see how it worked
-
-	//test code for calling the different splash screens
-
-	/*showSplashScreen(LOSE);
-	
-	showSplashScreen(STAGE2);
-
-	showSplashScreen(WIN);*/
-
-
-	/*************************************************************
-						Level One Setup
-	**************************************************************/
-
 	// Load the texture
 	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
 	
@@ -442,12 +349,6 @@ int main( void )
 	//add earth and stretch out
 	bool res;
 	res = loadOBJ("earth.obj", vertices, uvs, normals);
-	/*glm::mat4 stretch = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f,3.0f,1.0f));
-	for (int i = 0; i< vertices.size();i++){
-		glm::vec4 point = glm::vec4(vertices[i],1.0f);
-		point = stretch * point;
-		vertices[i] = glm::vec3(point.x, point.y, point.z);
-	}*/
 
 	//add player model
 	Entity* player = addPlayer(4, vertices, uvs, normals);
@@ -477,10 +378,9 @@ int main( void )
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-	////////////////////////////////////////////////////////////////////////////////////////
 
-	//////////////////////////////////Do Loop///////////////////////////
 
+	//do loop
 	do{
 		// glfwGetTime is called only once, the first time this function is called
 		static double lastTime = glfwGetTime();
@@ -627,10 +527,97 @@ int main( void )
 		   glfwWindowShouldClose(window) == 0 && enemyCount > 0);
 
 
-	////clear buffer vextors
-	//vertices.clear();
-	//uvs.clear();
-	//normals.clear();
+	//cleanup and next splash screen
+	//clear buffer vextors
+	vertices.clear();
+	uvs.clear();
+	normals.clear();
+
+	showSplashScreen(STAGE2);
+}
+
+//level two method
+
+///////////////////////////////////////////////////////////////
+
+
+
+
+/*************************************************************
+						Main method
+**************************************************************/
+int main( void )
+{
+	// Initialise GLFW
+	if( !glfwInit() )
+	{
+		fprintf( stderr, "Failed to initialize GLFW\n" );
+		return -1;
+	}
+
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// Open a window and create its OpenGL context
+	window = glfwCreateWindow( 800, 600, "Game", NULL, NULL);
+	if( window == NULL ){
+		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+
+	// Initialize GLEW
+	glewExperimental = true; // Needed for core profile
+	if (glewInit() != GLEW_OK) {
+		fprintf(stderr, "Failed to initialize GLEW\n");
+		return -1;
+	}
+
+	// Ensure we can capture the escape key being pressed below
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetCursorPos(window, 1024/2, 768/2);
+
+	// Dark blue background
+	if (white) {glClearColor(20.0f, 20.0f, 20.0f, 0.0f);}
+	else {glClearColor(0.0f, 0.0f, 0.0f, 0.0f);}
+
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS); 
+
+	// Cull triangles which normal is not towards the camera
+	glEnable(GL_CULL_FACE);
+
+	//GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	// Create and compile our GLSL program from the shaders
+	/*GLuint*/ programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+
+	// Get a handle for our "MVP" uniform
+	/*GLuint*/ MatrixID = glGetUniformLocation(programID, "MVP");
+	
+	
+
+	/*************************************************************
+						Start Screen Setup
+	**************************************************************/
+	
+	showSplashScreen(START); // I already moved this on into a method to see how it worked
+
+	/*************************************************************
+						Level One Setup
+	**************************************************************/
+	levelOne();
+
+
+	
+	showSplashScreen(WIN);
 
 	//showLoseScreen();
 
