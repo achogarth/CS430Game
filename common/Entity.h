@@ -26,7 +26,7 @@ public:
 		std::vector<glm::vec2> & out_uvs,
 		std::vector<glm::vec3> & out_normals);
 
-	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int enemyCount); //virtual makes this abstract
+	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount); //virtual makes this abstract
 
 	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
