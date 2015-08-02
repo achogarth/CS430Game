@@ -26,7 +26,7 @@ public:
 		std::vector<glm::vec2> & out_uvs,
 		std::vector<glm::vec3> & out_normals);
 
-	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount); //virtual makes this abstract
+	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer); //virtual makes this abstract
 
 	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
@@ -48,7 +48,7 @@ public:
 
 	double getLifeSpan(void);
 
-	void destroy(std::vector<glm::vec3> & vertexBuffer);
+	void virtual destroy(std::vector<glm::vec3> & vertexBuffer, std::vector<glm::vec2> & textureBuffer);
 
 	void scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale);
 

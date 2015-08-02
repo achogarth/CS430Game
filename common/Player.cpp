@@ -1,5 +1,7 @@
 #include <common\Entity.h>
 #include <common\Player.h>
+#include <Windows.h>
+#include <iostream>
 
 using namespace std;
 using namespace glm;
@@ -40,11 +42,25 @@ int Player::removeLife()
 		return 0;
 }
 
-/*bool Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
+void Player::destroy(std::vector<glm::vec3> & vertexBuffer,std::vector<glm::vec2> & textureBuffer)
 {
-	if (removeLife() < 1)
-	{
-		return true;
+	cout << "Player destroy method called" << endl;
+	setTexture(3,4,textureBuffer);
+	removeLife();
+	switch (lives){
+	case 3:
+		setTexture(2,0,textureBuffer);
+		break;
+	case 2:
+		setTexture(2,1,textureBuffer);
+		break;
+	case 1:
+		setTexture(2,2,textureBuffer);
+		Sleep(2000);
+		break;
+	default:
+		setTexture(3,4,textureBuffer);
+		break;
 	}
-	return false;
-}*/
+
+}
