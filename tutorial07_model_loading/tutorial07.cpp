@@ -49,7 +49,7 @@ To Do: (! indicates done, % indicates partial completion)
 #define START "Images/Splash.bmp"
 #define LOSE "Images/LoseScreen.bmp"
 #define WIN "Images/WinScreen.bmp"
-#define STAGE2 "Images/Stage2.bmp"
+#define STAGE2 "Images/Stage2Instruct.bmp"
 
 GLuint Texture;
 GLuint TextureID;
@@ -201,7 +201,7 @@ Entity* addNugget (
 		location,					//location on screen
 		0,							//texture row
 		4,
-		6.0f);
+		15.0f);
 
 	return nugget;
 }
@@ -220,7 +220,7 @@ Entity* addCrystal (
 		location,					//location on screen
 		0,							//texture row
 		5,
-		6.0f);
+		15.0f);
 
 	return crystal;
 }
@@ -239,7 +239,7 @@ Entity* addRose (
 		location,					//location on screen
 		0,							//texture row
 		6,
-		6.0f);
+		15.0f);
 
 	return rose;
 }
@@ -258,7 +258,7 @@ Entity* addClasp (
 		location,					//location on screen
 		0,							//texture row
 		7,
-		6.0f);
+		15.0f);
 
 	return clasp;
 }
@@ -863,10 +863,11 @@ void levelOne()
 			url = STAGE2;
 			break;
 		}
-
+		
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS || glfwWindowShouldClose(window) == 0))
 		{
 			url = START;
+			break;
 		}
 
 	} // Check if the ESC key was pressed or the window was closed
@@ -941,8 +942,12 @@ void levelTwo() {
 		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
 		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
 		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		
 	}
 
+	//mothership
+	wave.push_back(addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f)));
+	wave[wave.size()-1]->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
 
 	enemyCount = wave.size();
@@ -1129,15 +1134,16 @@ void levelTwo() {
 			break;
 		}
 
-		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS))
+		if (enemyCount < 1)
 		{
-			url = STAGE2;
+			url = WIN;
 			break;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS || glfwWindowShouldClose(window) == 0))
 		{
 			url = START;
+			break;
 		}
 
 	} // Check if the ESC key was pressed or the window was closed
