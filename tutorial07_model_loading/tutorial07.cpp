@@ -120,6 +120,153 @@ Entity* addEgg (
 	return egg;
 }
 
+Entity* addTulip (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* tulip = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		2,
+		1.5f);
+
+	return tulip;
+}
+
+Entity* addBrain (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* brain = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		3,
+		1.5f);
+
+	return brain;
+}
+
+Entity* addNugget (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* nugget = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		4,
+		1.5f);
+
+	return nugget;
+}
+
+Entity* addCrystal (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* crystal = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		5,
+		1.5f);
+
+	return crystal;
+}
+
+Entity* addRose (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* rose = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		6,
+		1.5f);
+
+	return rose;
+}
+
+Entity* addClasp (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Entity* clasp = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		7,
+		1.5f);
+
+	return clasp;
+}
+
+Entity* addFoe (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location,
+		int type)
+{
+	if (type>=8){
+		Entity* foe = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		0,
+		1.5f);
+		return foe;
+	}
+	else{
+	Entity* foe = new Entity(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		0,							//texture row
+		type,
+		1.5f);
+
+	return foe;}
+}
+
 Entity* addBullet (
 		std::vector<glm::vec3> & vertexBuffer,
 		std::vector<glm::vec2> & uvBuffer,
