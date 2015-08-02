@@ -24,5 +24,5 @@ public:
 
 	int removeLife(); // decrements current lives and returns remaining lives
 
-	/*bool destroy(std::vector<glm::vec3> & vertexBuffer);*/
+	virtual void destroy(std::vector<glm::vec3> & vertexBuffer,std::vector<glm::vec2> & textureBuffer);
 };

@@ -13,6 +13,7 @@
 #include <cstring>
 #include <common/objloader.hpp>
 #include <algorithm>
+#include <stdlib.h>
 
 #include <iostream>
 #include <glm\gtx\string_cast.hpp>
@@ -84,7 +85,7 @@ bool Entity::loadObject(const char * path,
 	return loadOBJ(path, out_vertices, out_uvs, out_normals);
 }
 
-bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount)
+bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer)
 {
 	if (active){
 		//get center of this item
@@ -109,10 +110,10 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			if (distance < 1.5)
 			{
 				//collision
-				destroy(vertexBuffer);
+				destroy(vertexBuffer, textureBuffer);
 				enemyCount--;
-				bullets[i]->destroy(vertexBuffer);
-				return true;
+				bullets[i]->destroy(vertexBuffer, textureBuffer);
+				return false;
 			}
 		}
 
@@ -127,12 +128,19 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 		if (distance < 1.5)
 		{
 			//collision
-			destroy(vertexBuffer);
-			player->destroy(vertexBuffer);
+			destroy(vertexBuffer, textureBuffer);
+			enemyCount--;
 			return true;
 		}
 
 		//check ground collision
+		if (level == 1)
+		{
+			if(self.y < 4.0)
+			{
+				return true;
+			}
+		}
 
 	}
 	return false;
@@ -283,7 +291,7 @@ double Entity::getLifeSpan(void)
 	return glfwGetTime() - creationTime;
 }
 
-void Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
+void Entity::destroy(std::vector<glm::vec3> & vertexBuffer, std::vector<glm::vec2> & textureBuffer)
 {
 	active = false;
 
