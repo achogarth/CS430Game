@@ -491,7 +491,10 @@ void showSplashScreen(char * url)
 
 void destroyPlayer (Player* player){
 
-	
+	/////////////////////////////////
+	//change texture to explosion and display
+	//////////////////////////////////
+
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -533,6 +536,7 @@ void destroyPlayer (Player* player){
 	// 2nd attribute buffer : UVs
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]) ;
 	glVertexAttribPointer(
 		1,                                // attribute
 		2,                                // size
@@ -552,8 +556,16 @@ void destroyPlayer (Player* player){
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
+	//////////////////////////////////////////////////
+	//remove life from player and play explosion sound
+	//////////////////////////////////////////////////
+
 	player->removeLife();
 	PlaySound("Sounds/boom.wav",NULL,SND_FILENAME|SND_SYNC);
+
+	//////////////////////////////////////////////////////////////////
+	//check remaining lives and exit to lose screen or update texture
+	/////////////////////////////////////////////////////////////////
 	int lifeCheck = player->getLives();
 	switch (lifeCheck){
 	case 3:
@@ -609,6 +621,7 @@ void destroyPlayer (Player* player){
 	// 2nd attribute buffer : UVs
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]) ;
 	glVertexAttribPointer(
 		1,                                // attribute
 		2,                                // size
@@ -870,7 +883,13 @@ void levelOne()
 }
 
 //level two method
-void levelTwo() {}
+void levelTwo() {
+
+
+
+
+
+}
 
 ///////////////////////////////////////////////////////////////
 
