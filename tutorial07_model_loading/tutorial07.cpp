@@ -201,7 +201,7 @@ Entity* addNugget (
 		location,					//location on screen
 		0,							//texture row
 		4,
-		1.5f);
+		6.0f);
 
 	return nugget;
 }
@@ -220,7 +220,7 @@ Entity* addCrystal (
 		location,					//location on screen
 		0,							//texture row
 		5,
-		1.5f);
+		6.0f);
 
 	return crystal;
 }
@@ -239,7 +239,7 @@ Entity* addRose (
 		location,					//location on screen
 		0,							//texture row
 		6,
-		1.5f);
+		6.0f);
 
 	return rose;
 }
@@ -258,7 +258,7 @@ Entity* addClasp (
 		location,					//location on screen
 		0,							//texture row
 		7,
-		1.5f);
+		6.0f);
 
 	return clasp;
 }
@@ -858,7 +858,7 @@ void levelOne()
 			break;
 		}
 
-		if (enemyCount < 1)
+		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS))
 		{
 			url = STAGE2;
 			break;
@@ -885,10 +885,272 @@ void levelOne()
 //level two method
 void levelTwo() {
 
+	//setup
+	level = 2;
+	playerLives = 3;
+
+	char* url;
+	// Load the texture
+	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
+	
+	// Get a handle for our "myTextureSampler" uniform
+	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+//add player model
+	player = addPlayer(4, vertices, uvs, normals);
+	glm::vec3 point1 = glm::vec3(1.0f);
+
+	std::vector<Entity*> wave;
+	//for (int i = 0; i < 15; i++)
+	//{
+	//	
+	//	wave.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
+	//	wave.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
+	//	wave.push_back(addLotus(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
+	//	wave.push_back(addBrain(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
+	//}
+	
+	float y = 30;
+
+	for (float x = -20; x< 15; y+=1.5, x+=2.5){
+			wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+	}
+	y+=4.5;
+	for (float x = 20; x>-15; y+=1.5, x-=2.5){
+		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+	}
+	y+=10;
+	for (float x=0; x<=2.5;x+=2.5){
+		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+	}
+
+	for(float x= 20; x>5; x-=2.5,y+= 1.75){
+		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+	}
 
 
 
+	enemyCount = wave.size();
+	bullets.clear();
+	setupBullets(3);
 
+	// Load it into a VBO
+
+	//GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+	//GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+
+	int texture = 0;
+
+	//do loop
+	do{
+		// glfwGetTime is called only once, the first time this function is called
+		static double lastTime = glfwGetTime();
+		static double bulletTime = lastTime;
+
+		// Compute time difference between current and last frame
+		double currentTime = glfwGetTime();
+		float deltaTime = float(currentTime - lastTime) / 2;
+
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Use our shader
+		glUseProgram(programID);
+
+		//move enemy waves and check for collisions
+		for (int i = 0; i < wave.size(); i++)
+		{
+			Entity* current = wave[i];
+			bool done = false;
+			if (current->isActive())
+			{
+				current->moveY(vertices, -deltaTime);
+
+				//check for collision
+				if (current->collide(vertices, bullets, player, enemyCount, level, uvs)){
+					//player loses life
+					destroyPlayer(player);
+					playerLives = player->getLives();
+					if(playerLives > 0)
+					{
+						//move aliens back up screen and reset clock time
+						for (int i = 0; i < wave.size(); i++){
+							if (wave[i]->isActive()){
+								wave[i]->getLocation(vertices,point1);
+								wave[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+							}
+						}
+						currentTime = glfwGetTime();
+					}
+					done = true;
+				}
+			}
+			if (done) {break;}
+		}
+
+
+		//left and right keys
+		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+		{
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x > -19.0f)
+			{
+				player->moveX(vertices, -deltaTime);
+			}
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+		{
+			point1 = glm::vec3(1.0f);
+			player->getLocation(vertices,point1);
+			if (point1.x < 19.0f){
+				player->moveX(vertices, deltaTime);
+			}
+		}
+
+		//move and deactivate bullets
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			if (bullets[i]->isActive()){
+				bullets[i]->moveY(vertices,deltaTime);
+				bullets[i]->getLocation(vertices,point1);
+				if (point1.y > 29.0f)
+				{
+					bullets[i]->destroy(vertices, uvs);
+				}
+			}
+		}
+
+		//
+		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
+		{
+			if (bullets[nextBullet]->isActive())
+			{
+				//bullet limit reached
+				//do nothing
+			}
+			else
+			{
+
+				if ((currentTime - bulletTime) > 0.2){
+					//put bullet above player
+					point1 = glm::vec3(1.0f);
+					player->getLocation(vertices, point1);
+					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
+					bullets[nextBullet]->activate();
+					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
+					nextBullet = (nextBullet + 1) % bullets.size();
+					bulletTime = currentTime;
+				}
+			}
+		}
+
+		// Compute the MVP matrix from keyboard and mouse input
+		computeMatricesFromInputs();
+		Projection = getProjectionMatrix();
+		View = getViewMatrix();
+		ModelMatrix = glm::mat4(1.0);
+		MVP = Projection * View * ModelMatrix;
+
+		// Send our transformation to the currently bound shader, 
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i(TextureID, 0);
+
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
+		glVertexAttribPointer(
+			0,                  // attribute
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+
+		// 2nd attribute buffer : UVs
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glVertexAttribPointer(
+			1,                                // attribute
+			2,                                // size
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
+
+		// Draw the triangle !
+		glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+
+		lastTime = currentTime;
+		texture = (texture + 1) % 3;
+
+		if (playerLives < 1)
+		{
+			url = LOSE;
+			break;
+		}
+
+		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS))
+		{
+			url = STAGE2;
+			break;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS || glfwWindowShouldClose(window) == 0))
+		{
+			url = START;
+		}
+
+	} // Check if the ESC key was pressed or the window was closed
+	while( true);
+
+
+	//cleanup and next splash screen
+	//clear buffer vextors
+	vertices.clear();
+	uvs.clear();
+	normals.clear();
+
+	showSplashScreen(url);
 }
 
 ///////////////////////////////////////////////////////////////
