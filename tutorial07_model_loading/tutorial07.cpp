@@ -8,6 +8,7 @@
 #include <vector>
 #include <common/Entity.h>
 #include <common\Player.h>
+#include <common\Mothership.h>
 #include <Windows.h>
 
 // Include GLEW
@@ -50,6 +51,7 @@ To Do: (! indicates done, % indicates partial completion)
 #define LOSE "Images/LoseScreen.bmp"
 #define WIN "Images/WinScreen.bmp"
 #define STAGE2 "Images/Stage2Instruct.bmp"
+#define BULLET_COUNT 3
 
 GLuint Texture;
 GLuint TextureID;
@@ -72,6 +74,7 @@ glm::mat4 MVP = Projection * View * ModelMatrix;
 
 std::vector<Entity*> bullets;
 Player* player;
+Mothership* mother;
 
 bool white = false;
 int nextBullet;
@@ -79,18 +82,53 @@ int enemyCount;
 int level;
 int playerLives = 3;
 bool continueGame = true;
+glm::vec3 tempPoint;
 ///////////////////////////////////////////////////////////////
-
-
-
 
 
 /*************************************************************
 						helper methods
 **************************************************************/
 void levelOne();
-void levelOne();
 void levelTwo();
+
+void fire(double currentTime, double &bulletTime, glm::vec3 point)
+{
+	for (int i = 0; i < BULLET_COUNT; i++){
+				if (!bullets[i]->isActive()){
+					//available to fire
+					if ((currentTime - bulletTime) > 0.2){
+						//put bullet above player
+						tempPoint = glm::vec3(1.0f);
+						player->getLocation(vertices, tempPoint);
+						bullets[nextBullet]->move(vertices, glm::vec3(tempPoint.x,tempPoint.y,tempPoint.z));
+						bullets[nextBullet]->activate();
+						PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
+						nextBullet = (nextBullet + 1) % bullets.size();
+						bulletTime = currentTime;
+					}
+				}
+			}
+			//if (bullets[nextBullet]->isActive())
+			//{
+			//	//bullet limit reached
+			//	//do nothing
+			//}
+			//else
+			//{
+
+			//	if ((currentTime - bulletTime) > 0.2){
+			//		//put bullet above player
+			//		point1 = glm::vec3(1.0f);
+			//		player->getLocation(vertices, point1);
+			//		bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
+			//		bullets[nextBullet]->activate();
+			//		PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
+			//		nextBullet = (nextBullet + 1) % bullets.size();
+			//		bulletTime = currentTime;
+			//	}
+			//}
+}
 
 Player* addPlayer (int numOfLives,
 		std::vector<glm::vec3> & vertexBuffer,
@@ -106,8 +144,8 @@ Player* addPlayer (int numOfLives,
 		glm::vec3(0.0f,4.0f,0.0f),	//location on screen
 		2,							//texture row
 		0,							//texture column
-		20.0
-		);
+		20.0,
+		1);
 	return player;
 };
 
@@ -125,7 +163,8 @@ Entity* addSpiral (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		1.8f);
+		1.8f,
+		1);
 
 	return spiral;
 }
@@ -144,7 +183,8 @@ Entity* addEgg (
 		location,					//location on screen
 		0,							//texture row
 		1,
-		1.8f);
+		1.8f,
+		2);
 
 	return egg;
 }
@@ -163,7 +203,8 @@ Entity* addLotus (
 		location,					//location on screen
 		0,							//texture row
 		2,
-		1.8f);
+		1.8f,
+		3);
 
 	return lotus;
 }
@@ -182,7 +223,8 @@ Entity* addBrain (
 		location,					//location on screen
 		0,							//texture row
 		3,
-		1.8f);
+		1.8f,
+		4);
 
 	return brain;
 }
@@ -201,7 +243,8 @@ Entity* addNugget (
 		location,					//location on screen
 		0,							//texture row
 		4,
-		15.0f);
+		15.0f,
+		1);
 
 	return nugget;
 }
@@ -220,7 +263,8 @@ Entity* addCrystal (
 		location,					//location on screen
 		0,							//texture row
 		5,
-		15.0f);
+		15.0f,
+		1);
 
 	return crystal;
 }
@@ -239,7 +283,8 @@ Entity* addRose (
 		location,					//location on screen
 		0,							//texture row
 		6,
-		15.0f);
+		15.0f,
+		1);
 
 	return rose;
 }
@@ -258,9 +303,30 @@ Entity* addClasp (
 		location,					//location on screen
 		0,							//texture row
 		7,
-		15.0f);
+		15.0f,
+		1);
 
 	return clasp;
+}
+
+Mothership* addMothership (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location)
+{
+	Mothership* mothership = new Mothership(
+		vertexBuffer,				//vertex buffer
+		uvBuffer,					//texture buffer
+		normalBuffer,				//normal buffer
+		"Player2.obj",				//object file
+		location,					//location on screen
+		4,							//texture row
+		5,
+		15.0f,
+		1000000);
+
+	return mothership;
 }
 
 Entity* addFoe (
@@ -279,7 +345,8 @@ Entity* addFoe (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		1.5f);
+		1.5f,
+		1);
 		return foe;
 	}
 	else{
@@ -291,7 +358,8 @@ Entity* addFoe (
 		location,					//location on screen
 		0,							//texture row
 		type,
-		1.5f);
+		1.5f,
+		type+1);
 
 	return foe;}
 }
@@ -310,7 +378,8 @@ Entity* addBullet (
 		location,					//location on screen
 		4,							//texture row
 		2,
-		30.0f);
+		30.0f,
+		1);
 
 	return bullet;
 }
@@ -648,7 +717,7 @@ void levelOne()
 {
 	//setup
 	level = 1;
-	playerLives = 3;
+	playerLives = 2;
 
 	char* url;
 	// Load the texture
@@ -662,7 +731,7 @@ void levelOne()
 	res = loadOBJ("earth.obj", vertices, uvs, normals);
 
 	//add player model
-	player = addPlayer(4, vertices, uvs, normals);
+	player = addPlayer(playerLives, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
 
 	std::vector<Entity*> wave1;
@@ -676,7 +745,7 @@ void levelOne()
 	}
 
 	enemyCount = wave1.size();
-	setupBullets(3);
+	setupBullets(BULLET_COUNT);
 
 	// Load it into a VBO
 
@@ -690,7 +759,7 @@ void levelOne()
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
-	int texture = 0;
+	
 
 	//do loop
 	do{
@@ -739,6 +808,8 @@ void levelOne()
 			if (done) {break;}
 		}
 
+		
+
 
 		//left and right keys
 		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
@@ -776,25 +847,9 @@ void levelOne()
 		//
 		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
 		{
-			if (bullets[nextBullet]->isActive())
-			{
-				//bullet limit reached
-				//do nothing
-			}
-			else
-			{
 
-				if ((currentTime - bulletTime) > 0.2){
-					//put bullet above player
-					point1 = glm::vec3(1.0f);
-					player->getLocation(vertices, point1);
-					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
-					bullets[nextBullet]->activate();
-					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
-					nextBullet = (nextBullet + 1) % bullets.size();
-					bulletTime = currentTime;
-				}
-			}
+			fire(currentTime, bulletTime, point1);
+			
 		}
 
 		// Compute the MVP matrix from keyboard and mouse input
@@ -850,7 +905,6 @@ void levelOne()
 		glfwPollEvents();
 
 		lastTime = currentTime;
-		texture = (texture + 1) % 3;
 
 		if (playerLives < 1)
 		{
@@ -858,15 +912,9 @@ void levelOne()
 			break;
 		}
 
-		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS))
+		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		{
 			url = STAGE2;
-			break;
-		}
-		
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS || glfwWindowShouldClose(window) == 0))
-		{
-			url = START;
 			break;
 		}
 
@@ -888,7 +936,7 @@ void levelTwo() {
 
 	//setup
 	level = 2;
-	playerLives = 3;
+	//playerLives = 3;
 
 	char* url;
 	// Load the texture
@@ -896,7 +944,7 @@ void levelTwo() {
 	
 	// Get a handle for our "myTextureSampler" uniform
 	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-//add player model
+	//add player model
 	player = addPlayer(4, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
 
@@ -946,13 +994,16 @@ void levelTwo() {
 	}
 
 	//mothership
-	wave.push_back(addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f)));
-	wave[wave.size()-1]->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
+	//wave.push_back(addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f)));
+	
+	//wave[wave.size()-1]->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
+	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f));
+	mother->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
 	enemyCount = wave.size();
 	bullets.clear();
-	setupBullets(3);
+	setupBullets(BULLET_COUNT);
 
 	// Load it into a VBO
 
@@ -966,7 +1017,7 @@ void levelTwo() {
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
-	int texture = 0;
+	
 
 	//do loop
 	do{
@@ -985,7 +1036,7 @@ void levelTwo() {
 		glUseProgram(programID);
 
 		//move enemy waves and check for collisions
-		for (int i = 0; i < wave.size(); i++)
+		for (int i = 0; i < wave.size()-1; i++)
 		{
 			Entity* current = wave[i];
 			bool done = false;
@@ -1013,6 +1064,14 @@ void levelTwo() {
 				}
 			}
 			if (done) {break;}
+		}
+
+		//move mothership and check for collision
+		mother->moveY(vertices, -deltaTime);
+
+		if (mother->collide(vertices, bullets, player, enemyCount, level, uvs)){
+			url=WIN;
+			break;
 		}
 
 
@@ -1052,25 +1111,7 @@ void levelTwo() {
 		//
 		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
 		{
-			if (bullets[nextBullet]->isActive())
-			{
-				//bullet limit reached
-				//do nothing
-			}
-			else
-			{
-
-				if ((currentTime - bulletTime) > 0.2){
-					//put bullet above player
-					point1 = glm::vec3(1.0f);
-					player->getLocation(vertices, point1);
-					bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
-					bullets[nextBullet]->activate();
-					PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
-					nextBullet = (nextBullet + 1) % bullets.size();
-					bulletTime = currentTime;
-				}
-			}
+			fire(currentTime, bulletTime, point1);
 		}
 
 		// Compute the MVP matrix from keyboard and mouse input
@@ -1126,7 +1167,7 @@ void levelTwo() {
 		glfwPollEvents();
 
 		lastTime = currentTime;
-		texture = (texture + 1) % 3;
+		
 
 		if (playerLives < 1)
 		{
@@ -1140,9 +1181,9 @@ void levelTwo() {
 			break;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE == GLFW_PRESS || glfwWindowShouldClose(window) == 0))
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		{
-			url = START;
+			url = WIN;
 			break;
 		}
 

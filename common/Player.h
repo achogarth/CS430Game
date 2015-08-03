@@ -16,7 +16,8 @@ public:
 		glm::vec3 location, //location to place object
 		int textureRow,
 		int textureColumn,
-		float speed);
+		float speed,
+		int hitpoints);
 
 	~Player();
 

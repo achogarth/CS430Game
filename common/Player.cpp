@@ -17,7 +17,8 @@ Player::Player(
 	glm::vec3 location, //location to place object
 	int textureRow,
 	int textureColumn,
-	float speed): Entity(
+	float speed,
+	int hitpoints): Entity(
 	vertexBuffer,
 	uvBuffer,
 	normalBuffer, //textureBuffer
@@ -25,9 +26,21 @@ Player::Player(
 	location, //location to place object
 	textureRow,
 	textureColumn,
-	speed)
+	speed,
+	hitpoints)
 {
 	lives = numOfLives;
+	switch (lives){
+	case 1:
+		setTexture(2,2,uvBuffer);
+		break;
+	case 2:
+		setTexture(2,1,uvBuffer);
+		break;
+	default:
+		setTexture(2,2,uvBuffer);
+		break;
+	}
 }
 
 int Player::getLives(){return lives;}
