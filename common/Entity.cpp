@@ -21,7 +21,7 @@
 
 int position;
 int vertexCount;
-int hitpoints;
+int health;
 int mySpeed;
 int currentTextureRow, currentTextureCol;
 double creationTime;
@@ -35,7 +35,8 @@ Entity::Entity(
 	glm::vec3 location,
 	int textureRow,
 	int textureColumn,
-	float speed)
+	float speed,
+	int hitpoints)
 {
 	//save references to buffers
 	//save index of first vertex
@@ -55,7 +56,7 @@ Entity::Entity(
 	}
 
 	//set hitpoints
-	hitpoints = 1;
+	health = hitpoints;
 
 	//set speed
 	mySpeed = speed;
@@ -110,8 +111,12 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			if (distance < 1.5)
 			{
 				//collision
-				destroy(vertexBuffer, textureBuffer);
-				enemyCount--;
+				health--;
+				if (health < 1)
+				{
+					destroy(vertexBuffer, textureBuffer);
+					enemyCount--;
+				}
 				bullets[i]->destroy(vertexBuffer, textureBuffer);
 				return false;
 			}

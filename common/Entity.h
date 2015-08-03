@@ -16,7 +16,8 @@ public:
 		glm::vec3 location, //location to place object
 		int textureRow,
 		int textureColumn,
-		float speed
+		float speed,
+		int hitpoints
 		);
 
 	~Entity(void);
@@ -38,7 +39,7 @@ public:
 
 	void moveY(std::vector<glm::vec3> & vertexBuffer, float time);
 
-	void setTexture(
+	virtual void setTexture(
 		int row, 
 		int col, 
 		std::vector<glm::vec2> & textureBuffer
