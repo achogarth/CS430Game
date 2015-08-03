@@ -38,7 +38,7 @@ Player::Player(
 		setTexture(2,1,uvBuffer);
 		break;
 	default:
-		setTexture(2,2,uvBuffer);
+		setTexture(2,0,uvBuffer);
 		break;
 	}
 }

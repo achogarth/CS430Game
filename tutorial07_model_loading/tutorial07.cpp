@@ -73,6 +73,7 @@ glm::mat4 ModelMatrix = glm::mat4(1.0);
 glm::mat4 MVP = Projection * View * ModelMatrix;
 
 std::vector<Entity*> bullets;
+std::vector<Entity*> enemies;
 Player* player;
 Mothership* mother;
 
@@ -91,6 +92,7 @@ glm::vec3 tempPoint;
 **************************************************************/
 void levelOne();
 void levelTwo();
+void clearVertices();
 
 void fire(double currentTime, double &bulletTime, glm::vec3 point)
 {
@@ -420,9 +422,7 @@ int closeProgram()
 void showSplashScreen(char * url)
 {
 	int task = 0;
-	if (vertices.size() > 0) vertices.clear();
-	if (uvs.size() > 0) uvs.clear();
-	if (normals.size() > 0) normals.clear();
+	clearVertices();
 
 	Texture = loadBMP_custom(url);
 
@@ -512,25 +512,23 @@ void showSplashScreen(char * url)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		if ( glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS && deltaTime > 1.0)
+		if ( glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS && deltaTime > 0.3)
 		{
 			task = 0;
 			break;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_SPACE ) == GLFW_PRESS && deltaTime > 1.0)
+		if (glfwGetKey(window, GLFW_KEY_SPACE ) == GLFW_PRESS && deltaTime > 0.3)
 		{
 			//clear buffer vextors
-			vertices.clear();
-			uvs.clear();
-			normals.clear();
+			clearVertices();
 
 			//is url is start
 			if (strcmp(url, START) == 0){task = 1;}
 			//if url is stage 2
 			if (strcmp(url, STAGE2) == 0){task = 2;}
 			//if url is lose or win
-			if (strcmp(url, WIN) == 0 || strcmp(url, LOSE) == 0){task = 3;}
+			if (strcmp(url, WIN) == 0 || strcmp(url, LOSE) == 0){task = 0;}
 
 			break;
 		}
@@ -712,12 +710,21 @@ void destroyPlayer (Player* player){
 
 }
 
+void clearVertices()
+{
+	if (vertices.size() > 0) {vertices.clear();}
+	if (uvs.size() > 0) {uvs.clear();}
+	if (normals.size() > 0) {normals.clear();}
+	if (enemies.size() > 0) {enemies.clear();}
+}
+
 //level one method
 void levelOne()
 {
+	clearVertices();
 	//setup
 	level = 1;
-	playerLives = 2;
+	playerLives = 3;
 
 	char* url;
 	// Load the texture
@@ -734,17 +741,18 @@ void levelOne()
 	player = addPlayer(playerLives, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
 
-	std::vector<Entity*> wave1;
+	//std::vector<Entity*> wave1;
+	enemies.clear();
 	for (int i = 0; i < 15; i++)
 	{
 		
-		wave1.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
-		wave1.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
-		wave1.push_back(addLotus(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
-		wave1.push_back(addBrain(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
+		enemies.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
+		enemies.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
+		enemies.push_back(addLotus(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
+		enemies.push_back(addBrain(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
 	}
 
-	enemyCount = wave1.size();
+	enemyCount = enemies.size();
 	setupBullets(BULLET_COUNT);
 
 	// Load it into a VBO
@@ -778,9 +786,9 @@ void levelOne()
 		glUseProgram(programID);
 
 		//move enemy waves and check for collisions
-		for (int i = 0; i < wave1.size(); i++)
+		for (int i = 0; i < enemies.size(); i++)
 		{
-			Entity* current = wave1[i];
+			Entity* current = enemies[i];
 			bool done = false;
 			if (current->isActive())
 			{
@@ -794,10 +802,10 @@ void levelOne()
 					if(playerLives > 0)
 					{
 						//move aliens back up screen and reset clock time
-						for (int i = 0; i < wave1.size(); i++){
-							if (wave1[i]->isActive()){
-								wave1[i]->getLocation(vertices,point1);
-								wave1[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+						for (int i = 0; i < enemies.size(); i++){
+							if (enemies[i]->isActive()){
+								enemies[i]->getLocation(vertices,point1);
+								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
 							}
 						}
 						currentTime = glfwGetTime();
@@ -924,16 +932,14 @@ void levelOne()
 
 	//cleanup and next splash screen
 	//clear buffer vextors
-	vertices.clear();
-	uvs.clear();
-	normals.clear();
+	clearVertices();
 
 	showSplashScreen(url);
 }
 
 //level two method
 void levelTwo() {
-
+	clearVertices();
 	//setup
 	level = 2;
 	//playerLives = 3;
@@ -948,7 +954,8 @@ void levelTwo() {
 	player = addPlayer(4, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
 
-	std::vector<Entity*> wave;
+	enemies.clear();
+	//std::vector<Entity*> wave;
 	//for (int i = 0; i < 15; i++)
 	//{
 	//	
@@ -961,35 +968,35 @@ void levelTwo() {
 	float y = 30;
 
 	for (float x = -20; x< 15; y+=1.5, x+=2.5){
-			wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
-			wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
 	}
 	y+=4.5;
 	for (float x = 20; x>-15; y+=1.5, x-=2.5){
-		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
-		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
-		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
 	}
 	y+=10;
 	for (float x=0; x<=2.5;x+=2.5){
-		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
-		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
-		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
 
-		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
-		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
-		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
 	}
 
 	for(float x= 20; x>5; x-=2.5,y+= 1.75){
-		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
-		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
-		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
 
 
-		wave.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
-		wave.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
-		wave.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
 		
 	}
 
@@ -1001,7 +1008,7 @@ void levelTwo() {
 	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f));
 	mother->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
-	enemyCount = wave.size();
+	enemyCount = enemies.size();
 	bullets.clear();
 	setupBullets(BULLET_COUNT);
 
@@ -1036,9 +1043,9 @@ void levelTwo() {
 		glUseProgram(programID);
 
 		//move enemy waves and check for collisions
-		for (int i = 0; i < wave.size()-1; i++)
+		for (int i = 0; i < enemies.size()-1; i++)
 		{
-			Entity* current = wave[i];
+			Entity* current = enemies[i];
 			bool done = false;
 			if (current->isActive())
 			{
@@ -1052,12 +1059,14 @@ void levelTwo() {
 					if(playerLives > 0)
 					{
 						//move aliens back up screen and reset clock time
-						for (int i = 0; i < wave.size(); i++){
-							if (wave[i]->isActive()){
-								wave[i]->getLocation(vertices,point1);
-								wave[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+						for (int i = 0; i < enemies.size(); i++){
+							if (enemies[i]->isActive()){
+								enemies[i]->getLocation(vertices,point1);
+								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
 							}
 						}
+						mother->getLocation(vertices,point1);
+						mother->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
 						currentTime = glfwGetTime();
 					}
 					done = true;
@@ -1193,9 +1202,7 @@ void levelTwo() {
 
 	//cleanup and next splash screen
 	//clear buffer vextors
-	vertices.clear();
-	uvs.clear();
-	normals.clear();
+	clearVertices();
 
 	showSplashScreen(url);
 }
@@ -1270,7 +1277,9 @@ int main( void )
 						Start Screen Setup
 	**************************************************************/
 	do {
+	clearVertices();
 	showSplashScreen(START); // I already moved this on into a method to see how it worked
+	clearVertices();
 	}
 	while (continueGame);
 	/*************************************************************

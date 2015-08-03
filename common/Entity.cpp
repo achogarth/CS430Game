@@ -111,12 +111,12 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			if (distance < 1.5)
 			{
 				//collision
-				health--;
+				health -= 1;
 				if (health < 1)
 				{
 					destroy(vertexBuffer, textureBuffer);
 					enemyCount--;
-				}
+				} else {std::cout << "still alive" << std::endl;}
 				bullets[i]->destroy(vertexBuffer, textureBuffer);
 				return false;
 			}
