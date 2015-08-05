@@ -9,6 +9,7 @@
 #include <common/Entity.h>
 #include <common\Player.h>
 #include <common\Mothership.h>
+#include <common\Digit.h>
 #include <Windows.h>
 
 // Include GLEW
@@ -74,6 +75,7 @@ glm::mat4 MVP = Projection * View * ModelMatrix;
 
 std::vector<Entity*> bullets;
 std::vector<Entity*> enemies;
+std::vector<Digit*> scoreVector;
 Player* player;
 Mothership* mother;
 
@@ -84,6 +86,7 @@ int level;
 int playerLives = 3;
 bool continueGame = true;
 glm::vec3 tempPoint;
+int score = 0;
 ///////////////////////////////////////////////////////////////
 
 
@@ -246,7 +249,7 @@ Entity* addNugget (
 		0,							//texture row
 		4,
 		15.0f,
-		1);
+		2);
 
 	return nugget;
 }
@@ -266,7 +269,7 @@ Entity* addCrystal (
 		0,							//texture row
 		5,
 		15.0f,
-		1);
+		2);
 
 	return crystal;
 }
@@ -286,7 +289,7 @@ Entity* addRose (
 		0,							//texture row
 		6,
 		15.0f,
-		1);
+		3);
 
 	return rose;
 }
@@ -306,7 +309,7 @@ Entity* addClasp (
 		0,							//texture row
 		7,
 		15.0f,
-		1);
+		4);
 
 	return clasp;
 }
@@ -398,6 +401,26 @@ void setupBullets (int count)
 		bullets[i]->destroy(vertices, uvs);	
 	}
 	nextBullet = 0;
+}
+
+void setupScore (int scoreValue)
+{
+	if (scoreVector.size() > 0) scoreVector.clear();
+	//add score digits
+	int value , remainder = scoreValue, divisor;
+	int x , y = 1;
+	glm::vec3 location;
+	for (int i = 0; i < 5; i++)
+	{
+		x = (2*i) - 19;
+		location = glm::vec3(x,y,-1.0f);
+		divisor = int(std::pow(10.0,(4-i)));
+		value = int(remainder / divisor);
+		remainder = remainder % divisor;
+		Digit* digit = new Digit(vertices, uvs, normals, "Player2.obj",location);
+		digit->setDigit(uvs, value);
+		scoreVector.push_back(digit);
+	}
 }
 
 
@@ -725,6 +748,8 @@ void levelOne()
 	//setup
 	level = 1;
 	playerLives = 3;
+	score = 12345;
+	setupScore(score);
 
 	char* url;
 	// Load the texture
@@ -943,6 +968,7 @@ void levelTwo() {
 	//setup
 	level = 2;
 	//playerLives = 3;
+	setupScore(score);
 
 	char* url;
 	// Load the texture
@@ -1079,6 +1105,7 @@ void levelTwo() {
 		mother->moveY(vertices, -deltaTime);
 
 		if (mother->collide(vertices, bullets, player, enemyCount, level, uvs)){
+			destroyPlayer(player);
 			url=WIN;
 			break;
 		}
