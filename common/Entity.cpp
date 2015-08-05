@@ -111,6 +111,7 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			if (distance < 1.5)
 			{
 				//collision
+				std::cout << "Health:" << health << std::endl;
 				health -= 1;
 				if (health < 1)
 				{
