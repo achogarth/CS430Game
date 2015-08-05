@@ -62,7 +62,7 @@ public:
 private:
 	int position;
 	int length;
-	int hitpoints;
+	int health;
 	int mySpeed;
 	double creationTime;
 	bool active;

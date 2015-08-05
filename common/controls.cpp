@@ -40,7 +40,7 @@ void computeMatricesFromInputs(){
 	double currentTime = glfwGetTime();
 	float deltaTime = float(currentTime - lastTime);
 
-	ProjectionMatrix = glm::ortho(-20.0f, 20.0f, 0.0f, 30.0f, 100.0f, -.01f);
+	ProjectionMatrix = glm::ortho(-20.0f, 20.0f, 0.0f, 30.0f, 100.0f, -1.01f);
 
 	// Get mouse position
 	//double xpos, ypos;
