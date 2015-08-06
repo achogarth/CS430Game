@@ -53,7 +53,7 @@ bool Mothership::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Enti
 
 	distance = sqrt(dx * dx + dy * dy);
 
-	if (distance < 19)
+	if (distance < 19.5)
 	{
 		//collision
 		return true;
