@@ -86,7 +86,7 @@ bool Entity::loadObject(const char * path,
 	return loadOBJ(path, out_vertices, out_uvs, out_normals);
 }
 
-bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer)
+bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer, int &score)
 {
 	if (active){
 		//get center of this item
@@ -117,7 +117,9 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 				{
 					destroy(vertexBuffer, textureBuffer);
 					enemyCount--;
-				} else {std::cout << "still alive" << std::endl;}
+					score += 5;
+					std::cout << "Score : " << score << std::endl;
+				}
 				bullets[i]->destroy(vertexBuffer, textureBuffer);
 				return false;
 			}
@@ -136,6 +138,16 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 			//collision
 			destroy(vertexBuffer, textureBuffer);
 			enemyCount--;
+			if (score > 100) {
+				score -= 100; 
+				
+					
+			}
+			else
+			{
+				score = 0;
+			}
+			std::cout << "Score : " << score << std::endl;
 			return true;
 		}
 
@@ -144,6 +156,14 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 		{
 			if(self.y < 4.0)
 			{
+				if (score > 100) {
+					score -= 100; 
+				}
+				else
+				{
+					score = 0;
+				}
+				std::cout << "Score : " << score << std::endl;
 				return true;
 			}
 		}
@@ -302,7 +322,7 @@ void Entity::destroy(std::vector<glm::vec3> & vertexBuffer, std::vector<glm::vec
 	active = false;
 
 	//move to inactive area (0,-10,0)
-	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
+	move(vertexBuffer,glm::vec3(40.0f,-10.0f,0.0f));
 }
 
 void Entity::scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale)
