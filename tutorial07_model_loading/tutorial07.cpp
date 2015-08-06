@@ -190,7 +190,7 @@ Entity* addEgg (
 		0,							//texture row
 		1,
 		1.8f,
-		2);
+		1);
 
 	return egg;
 }
@@ -210,7 +210,7 @@ Entity* addLotus (
 		0,							//texture row
 		2,
 		1.8f,
-		3);
+		1);
 
 	return lotus;
 }
@@ -230,7 +230,7 @@ Entity* addBrain (
 		0,							//texture row
 		3,
 		1.8f,
-		4);
+		1);
 
 	return brain;
 }
@@ -290,7 +290,7 @@ Entity* addRose (
 		0,							//texture row
 		6,
 		15.0f,
-		3);
+		2);
 	stage2PacifistCounter++;
 	return rose;
 }
@@ -310,7 +310,7 @@ Entity* addClasp (
 		0,							//texture row
 		7,
 		15.0f,
-		4);
+		2);
 	stage2PacifistCounter++;
 	return clasp;
 }
@@ -783,7 +783,7 @@ void levelOne()
 
 	char* url;
 	// Load the texture
-	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
+	Texture = loadBMP_custom("Images/WorkingTexturesBlack.bmp");
 	
 	// Get a handle for our "myTextureSampler" uniform
 	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
