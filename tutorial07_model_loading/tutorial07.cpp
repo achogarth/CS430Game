@@ -424,6 +424,35 @@ void setupScore (int scoreValue)
 	}
 }
 
+void refreshScore (void)
+{
+	if (scoreVector.size() <= 0) return;
+
+	int value , remainder = score, divisor;
+	for (int i = 0; i < 5; i++)
+	{
+		divisor = int(std::pow(10.0,(4-i)));
+		value = int(remainder / divisor);
+		remainder = remainder % divisor;
+		scoreVector[i]->setDigit(uvs, value);
+	}
+}
+
+void manageBullets(double deltaTime)
+{
+	for (int i = 0; i < bullets.size(); i++)
+		{
+			if (bullets[i]->isActive()){
+				bullets[i]->moveY(vertices,deltaTime);
+				bullets[i]->getLocation(vertices,tempPoint);
+				if (tempPoint.y > 29.0f)
+				{
+					score -= 2;
+					bullets[i]->destroy(vertices, uvs);
+				}
+			}
+		}
+}
 
 //close program method
 int closeProgram()
@@ -749,7 +778,7 @@ void levelOne()
 	//setup
 	level = 1;
 	playerLives = 3;
-	score = 12345;
+	score = 0;
 	setupScore(score);
 
 	char* url;
@@ -821,7 +850,7 @@ void levelOne()
 				current->moveY(vertices, -deltaTime);
 
 				//check for collision
-				if (current->collide(vertices, bullets, player, enemyCount, level, uvs)){
+				if (current->collide(vertices, bullets, player, enemyCount, level, uvs, score)){
 					//player loses life
 					destroyPlayer(player);
 					playerLives = player->getLives();
@@ -866,17 +895,7 @@ void levelOne()
 		}
 
 		//move and deactivate bullets
-		for (int i = 0; i < bullets.size(); i++)
-		{
-			if (bullets[i]->isActive()){
-				bullets[i]->moveY(vertices,deltaTime);
-				bullets[i]->getLocation(vertices,point1);
-				if (point1.y > 29.0f)
-				{
-					bullets[i]->destroy(vertices, uvs);
-				}
-			}
-		}
+		manageBullets(deltaTime);
 
 		//
 		if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS)
@@ -885,6 +904,8 @@ void levelOne()
 			fire(currentTime, bulletTime, point1);
 			
 		}
+
+		refreshScore();
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
@@ -906,7 +927,7 @@ void levelOne()
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]);
 		glVertexAttribPointer(
 			0,                  // attribute
 			3,                  // size
@@ -919,6 +940,7 @@ void levelOne()
 		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]);
 		glVertexAttribPointer(
 			1,                                // attribute
 			2,                                // size
@@ -1080,7 +1102,7 @@ void levelTwo() {
 				current->moveY(vertices, -deltaTime);
 
 				//check for collision
-				if (current->collide(vertices, bullets, player, enemyCount, level, uvs)){
+				if (current->collide(vertices, bullets, player, enemyCount, level, uvs, score)){
 					//player loses life
 					destroyPlayer(player);
 					playerLives = player->getLives();
@@ -1114,7 +1136,6 @@ void levelTwo() {
 			url=WIN;
 			break;
 		}
-
 
 		//left and right keys
 		if (glfwGetKey(window, GLFW_KEY_LEFT ) == GLFW_PRESS)
@@ -1155,6 +1176,8 @@ void levelTwo() {
 			fire(currentTime, bulletTime, point1);
 		}
 
+		refreshScore();
+
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs();
 		Projection = getProjectionMatrix();
@@ -1188,6 +1211,7 @@ void levelTwo() {
 		// 2nd attribute buffer : UVs
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]);
 		glVertexAttribPointer(
 			1,                                // attribute
 			2,                                // size
