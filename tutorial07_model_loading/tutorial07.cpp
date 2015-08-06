@@ -87,6 +87,7 @@ int playerLives = 3;
 bool continueGame = true;
 glm::vec3 tempPoint;
 int score = 0;
+int stage2PacifistCounter = 0;
 ///////////////////////////////////////////////////////////////
 
 
@@ -250,7 +251,7 @@ Entity* addNugget (
 		4,
 		15.0f,
 		2);
-
+	stage2PacifistCounter++;
 	return nugget;
 }
 
@@ -270,7 +271,7 @@ Entity* addCrystal (
 		5,
 		15.0f,
 		2);
-
+	stage2PacifistCounter++;
 	return crystal;
 }
 
@@ -290,7 +291,7 @@ Entity* addRose (
 		6,
 		15.0f,
 		3);
-
+	stage2PacifistCounter++;
 	return rose;
 }
 
@@ -310,7 +311,7 @@ Entity* addClasp (
 		7,
 		15.0f,
 		4);
-
+	stage2PacifistCounter++;
 	return clasp;
 }
 
@@ -1035,6 +1036,7 @@ void levelTwo() {
 	mother->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
 	enemyCount = enemies.size();
+
 	bullets.clear();
 	setupBullets(BULLET_COUNT);
 
@@ -1106,6 +1108,9 @@ void levelTwo() {
 
 		if (mother->collide(vertices, bullets, player, enemyCount, level, uvs)){
 			destroyPlayer(player);
+			if (stage2PacifistCounter == enemies.size()){
+				score += stage2PacifistCounter;
+			}
 			url=WIN;
 			break;
 		}
