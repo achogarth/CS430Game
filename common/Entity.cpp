@@ -167,6 +167,16 @@ bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*>
 				return true;
 			}
 		}
+		if (level == 2)
+		{
+			if (self.y < 0.0){
+				score += 10;
+				deactivate();
+				move(vertexBuffer, glm::vec3(40.0f,10.0f,0.0f));
+				deactivate();
+			}
+			
+		}
 
 	}
 	return false;

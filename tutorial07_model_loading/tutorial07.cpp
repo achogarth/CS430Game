@@ -51,7 +51,8 @@ To Do: (! indicates done, % indicates partial completion)
 #define START "Images/Splash.bmp"
 #define LOSE "Images/LoseScreen.bmp"
 #define WIN "Images/WinScreen.bmp"
-#define STAGE2 "Images/Stage2Instruct.bmp"
+#define STAGE2 "Images/Stage2InstructGreen.bmp"
+#define LEVEL_TEXTURES "Images/WorkingTexturesColor.bmp"
 #define BULLET_COUNT 3
 
 GLuint Texture;
@@ -103,7 +104,7 @@ void fire(double currentTime, double &bulletTime, glm::vec3 point)
 	for (int i = 0; i < BULLET_COUNT; i++){
 				if (!bullets[i]->isActive()){
 					//available to fire
-					if ((currentTime - bulletTime) > 0.2){
+					if ((currentTime - bulletTime) > 0.3){
 						//put bullet above player
 						tempPoint = glm::vec3(1.0f);
 						player->getLocation(vertices, tempPoint);
@@ -783,7 +784,7 @@ void levelOne()
 
 	char* url;
 	// Load the texture
-	Texture = loadBMP_custom("Images/WorkingTexturesBlack.bmp");
+	Texture = loadBMP_custom(LEVEL_TEXTURES);
 	
 	// Get a handle for our "myTextureSampler" uniform
 	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
@@ -995,7 +996,7 @@ void levelTwo() {
 
 	char* url;
 	// Load the texture
-	Texture = loadBMP_custom("Images/WorkingTextures.bmp");
+	Texture = loadBMP_custom(LEVEL_TEXTURES);
 	
 	// Get a handle for our "myTextureSampler" uniform
 	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
@@ -1054,7 +1055,7 @@ void levelTwo() {
 	
 	//wave[wave.size()-1]->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
-	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f));
+	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+30.0,0.0f));
 	mother->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
 	enemyCount = enemies.size();
