@@ -96,9 +96,9 @@ int stage2PacifistCounter = 0;
 /*************************************************************
 					helper method declerations
 **************************************************************/
-void fire();//fires a projectile if available
+//fires a projectile if available
+void fire();
 
-/*            methods for adding player/enemy/projectile objects        */
 //creates and adds a player object into all relevant buffers
 Player* addPlayer(int numOfLives,
 		std::vector<glm::vec3> & vertexBuffer,
@@ -193,14 +193,34 @@ int closeProgram();
 //displays a splashscreen with the given image url
 void showSplashScreen(char * url);
 
-void levelOne();
-void levelTwo();
-void clearVertices();
-void computeMVP();
+//displays screen with current score
+void showScoreScreen();
 
+//prepare buffers
 void setupBuffers();
+
+//update buffer information and draw triangles
 void drawBuffers();
 
+//compute MVP matrix andsend to bound shader
+void computeMVP();
+
+//play explosion sound, update texture and update lives
+void destroyPlayer (Player* player);
+
+//clear all the vectors used to store entity/player information
+//i.e. vertices, uvs, normals
+void clearVertices();
+
+//setup level one and run do loop
+void levelOne();
+
+//setup level 2 and run do loop
+void levelTwo();
+
+/*************************************************************
+					helper method implementations
+**************************************************************/
 
 void fire(double currentTime, double &bulletTime, glm::vec3 point)
 {
@@ -1019,15 +1039,6 @@ void levelTwo() {
 	//add player model
 	player = addPlayer(4, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
-	//std::vector<Entity*> wave;
-	//for (int i = 0; i < 15; i++)
-	//{
-	//	
-	//	wave.push_back(addSpiral(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),20.0f,0.0f)));
-	//	wave.push_back(addEgg(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),22.5f,0.0f)));
-	//	wave.push_back(addLotus(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),25.0f,0.0f)));
-	//	wave.push_back(addBrain(vertices,uvs,normals,glm::vec3(-17.5+(2.5*(i)),27.5f,0.0f)));
-	//}
 	
 	float y = 30;
 
@@ -1364,7 +1375,7 @@ int main( void )
 	**************************************************************/
 	do {
 	clearVertices();
-	showSplashScreen(START); // I already moved this on into a method to see how it worked
+	showSplashScreen(START);
 	clearVertices();
 	}
 	while (continueGame);
