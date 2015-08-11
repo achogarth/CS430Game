@@ -94,14 +94,113 @@ int stage2PacifistCounter = 0;
 
 
 /*************************************************************
-						helper methods
+					helper method declerations
 **************************************************************/
+void fire();//fires a projectile if available
+
+/*            methods for adding player/enemy/projectile objects        */
+//creates and adds a player object into all relevant buffers
+Player* addPlayer(int numOfLives,
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer);
+
+//adds enemy with spiral design and speed 3
+Entity* addSpiral (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with egg design and speed 2
+Entity* addEgg (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with egg design and speed 1
+Entity* addLotus (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with brain design and speed 1
+Entity* addBrain (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with nugget design, speed 12, and 2 hitpoints
+Entity* addNugget (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with crystal design, speed 12, and 2 hitpoints
+Entity* addCrystal (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with rose design, speed 12, and 2 hitpoints
+Entity* addRose (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy with clasp design, speed 12, and 2 hitpoints
+Entity* addClasp (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds enemy mothership, speed 12, and 1000000 hitpoints
+Mothership* addMothership (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//adds projectile object
+Entity* addBullet (
+		std::vector<glm::vec3> & vertexBuffer,
+		std::vector<glm::vec2> & uvBuffer,
+		std::vector<glm::vec3> & normalBuffer,
+		glm::vec3 location);
+
+//creates a pool of projectiles of size "count"
+void setupBullets (int count);
+
+//adds score to screen at given position
+void setupScore (int scoreValue, int xPos, int yPos);
+
+//refreshes score display to current score
+void refreshScore (void);
+
+//moves bullets and resets bullets if they reach top screen
+void manageBullets(double deltaTime);
+
+//closes the program and cleans up
+int closeProgram();
+
+//displays a splashscreen with the given image url
+void showSplashScreen(char * url);
+
 void levelOne();
 void levelTwo();
 void clearVertices();
 void computeMVP();
+
 void setupBuffers();
 void drawBuffers();
+
 
 void fire(double currentTime, double &bulletTime, glm::vec3 point)
 {
@@ -120,25 +219,6 @@ void fire(double currentTime, double &bulletTime, glm::vec3 point)
 					}
 				}
 			}
-			//if (bullets[nextBullet]->isActive())
-			//{
-			//	//bullet limit reached
-			//	//do nothing
-			//}
-			//else
-			//{
-
-			//	if ((currentTime - bulletTime) > 0.2){
-			//		//put bullet above player
-			//		point1 = glm::vec3(1.0f);
-			//		player->getLocation(vertices, point1);
-			//		bullets[nextBullet]->move(vertices, glm::vec3(point1.x,point1.y,point1.z));
-			//		bullets[nextBullet]->activate();
-			//		PlaySound("Sounds/pew.wav",NULL,SND_FILENAME|SND_ASYNC);
-			//		nextBullet = (nextBullet + 1) % bullets.size();
-			//		bulletTime = currentTime;
-			//	}
-			//}
 }
 
 Player* addPlayer (int numOfLives,
@@ -214,7 +294,7 @@ Entity* addLotus (
 		location,					//location on screen
 		0,							//texture row
 		2,
-		1.8f,
+		1.0f,
 		1);
 
 	return lotus;
@@ -340,41 +420,6 @@ Mothership* addMothership (
 	return mothership;
 }
 
-Entity* addFoe (
-		std::vector<glm::vec3> & vertexBuffer,
-		std::vector<glm::vec2> & uvBuffer,
-		std::vector<glm::vec3> & normalBuffer,
-		glm::vec3 location,
-		int type)
-{
-	if (type>=8){
-		Entity* foe = new Entity(
-		vertexBuffer,				//vertex buffer
-		uvBuffer,					//texture buffer
-		normalBuffer,				//normal buffer
-		"Player2.obj",				//object file
-		location,					//location on screen
-		0,							//texture row
-		0,
-		1.5f,
-		1);
-		return foe;
-	}
-	else{
-	Entity* foe = new Entity(
-		vertexBuffer,				//vertex buffer
-		uvBuffer,					//texture buffer
-		normalBuffer,				//normal buffer
-		"Player2.obj",				//object file
-		location,					//location on screen
-		0,							//texture row
-		type,
-		1.5f,
-		type+1);
-
-	return foe;}
-}
-
 Entity* addBullet (
 		std::vector<glm::vec3> & vertexBuffer,
 		std::vector<glm::vec2> & uvBuffer,
@@ -484,23 +529,13 @@ void showSplashScreen(char * url)
 
 	Texture = loadBMP_custom(url);
 
-	
 	// Get a handle for our "myTextureSampler" uniform
 	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
-	
 	loadOBJ("Splash.obj", vertices, uvs, normals);
 
 	// Load it into a VBO
 
-	//GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-	//GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+	setupBuffers();
 
 	float startTime = glfwGetTime();
 	float currentTime;
@@ -834,7 +869,6 @@ void levelOne()
 	glm::vec3 point1 = glm::vec3(1.0f);
 
 	//std::vector<Entity*> wave1;
-	enemies.clear();
 	for (int i = 0; i < 15; i++)
 	{
 		
@@ -985,8 +1019,6 @@ void levelTwo() {
 	//add player model
 	player = addPlayer(4, vertices, uvs, normals);
 	glm::vec3 point1 = glm::vec3(1.0f);
-
-	enemies.clear();
 	//std::vector<Entity*> wave;
 	//for (int i = 0; i < 15; i++)
 	//{
