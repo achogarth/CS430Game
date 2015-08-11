@@ -53,6 +53,7 @@ To Do: (! indicates done, % indicates partial completion)
 #define WIN "Images/WinScreen.bmp"
 #define STAGE2 "Images/Stage2InstructGreen.bmp"
 #define LEVEL_TEXTURES "Images/WorkingTexturesColor.bmp"
+#define SCORE "Images/Score.bmp"
 #define BULLET_COUNT 3
 
 GLuint Texture;
@@ -98,6 +99,9 @@ int stage2PacifistCounter = 0;
 void levelOne();
 void levelTwo();
 void clearVertices();
+void computeMVP();
+void setupBuffers();
+void drawBuffers();
 
 void fire(double currentTime, double &bulletTime, glm::vec3 point)
 {
@@ -170,7 +174,7 @@ Entity* addSpiral (
 		location,					//location on screen
 		0,							//texture row
 		0,
-		1.8f,
+		3.0f,
 		1);
 
 	return spiral;
@@ -190,7 +194,7 @@ Entity* addEgg (
 		location,					//location on screen
 		0,							//texture row
 		1,
-		1.8f,
+		2.0f,
 		1);
 
 	return egg;
@@ -405,17 +409,17 @@ void setupBullets (int count)
 	nextBullet = 0;
 }
 
-void setupScore (int scoreValue)
+void setupScore (int scoreValue, int xPos, int yPos)
 {
 	if (scoreVector.size() > 0) scoreVector.clear();
 	//add score digits
 	int value , remainder = scoreValue, divisor;
-	int x , y = 1;
+	int x;
 	glm::vec3 location;
 	for (int i = 0; i < 5; i++)
 	{
-		x = (2*i) - 19;
-		location = glm::vec3(x,y,-1.0f);
+		x = (2*i) + xPos;
+		location = glm::vec3(x,yPos,-1.0f);
 		divisor = int(std::pow(10.0,(4-i)));
 		value = int(remainder / divisor);
 		remainder = remainder % divisor;
@@ -448,7 +452,7 @@ void manageBullets(double deltaTime)
 				bullets[i]->getLocation(vertices,tempPoint);
 				if (tempPoint.y > 29.0f)
 				{
-					score -= 2;
+					score -= 10;
 					bullets[i]->destroy(vertices, uvs);
 				}
 			}
@@ -515,15 +519,7 @@ void showSplashScreen(char * url)
 		glUseProgram(programID);
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
-		Projection = getProjectionMatrix();
-		View = getViewMatrix();
-		ModelMatrix = glm::mat4(1.0);
-		MVP = Projection * View * ModelMatrix;
-
-		// Send our transformation to the currently bound shader, 
-		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		computeMVP();
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -610,37 +606,80 @@ void showSplashScreen(char * url)
 	}
 }
 
-void destroyPlayer (Player* player){
+void showScoreScreen()
+{
+	clearVertices();
+	setupScore(score, -5, 10);
+	loadOBJ("score.obj", vertices, uvs, normals);
 
-	/////////////////////////////////
-	//change texture to explosion and display
-	//////////////////////////////////
+	// Load the texture
+	Texture = loadBMP_custom(SCORE);
+	
+	// Get a handle for our "myTextureSampler" uniform
+	TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 
-	// Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	setupBuffers();
 
-	// Use our shader
-	glUseProgram(programID);
+	float startTime = glfwGetTime();
+	float currentTime;
+	float deltaTime;
 
-	player->setTexture(3,4,uvs);
+	do
+	{
 
-	// Compute the MVP matrix from keyboard and mouse input
-	computeMatricesFromInputs();
-	Projection = getProjectionMatrix();
-	View = getViewMatrix();
-	ModelMatrix = glm::mat4(1.0);
-	MVP = Projection * View * ModelMatrix;
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - startTime;
 
-	// Send our transformation to the currently bound shader, 
-	// in the "MVP" uniform
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Bind our texture in Texture Unit 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
-	// Set our "myTextureSampler" sampler to user Texture Unit 0
-	glUniform1i(TextureID, 0);
+		// Use our shader
+		glUseProgram(programID);
 
+		// Compute the MVP matrix from keyboard and mouse input
+		computeMVP();
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Texture);
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i(TextureID, 0);
+
+		drawBuffers();
+
+		if ( glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS && deltaTime > 0.3)
+		{
+			break;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_SPACE ) == GLFW_PRESS && deltaTime > 0.3)
+		{
+			//clear buffer vextors
+			clearVertices();
+			break;
+		}
+
+	}
+	while( true );
+
+	clearVertices();
+}
+
+void setupBuffers()
+{
+	//GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+
+	//GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
+}
+
+void drawBuffers()
+{
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -676,6 +715,45 @@ void destroyPlayer (Player* player){
 	// Swap buffers
 	glfwSwapBuffers(window);
 	glfwPollEvents();
+}
+
+void computeMVP()
+{
+	// Compute the MVP matrix from keyboard and mouse input
+	computeMatricesFromInputs();
+	Projection = getProjectionMatrix();
+	View = getViewMatrix();
+	ModelMatrix = glm::mat4(1.0);
+	MVP = Projection * View * ModelMatrix;
+
+	// Send our transformation to the currently bound shader, 
+	// in the "MVP" uniform
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+}
+
+void destroyPlayer (Player* player){
+
+	/////////////////////////////////
+	//change texture to explosion and display
+	//////////////////////////////////
+
+	// Clear the screen
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Use our shader
+	glUseProgram(programID);
+
+	player->setTexture(3,4,uvs);
+
+	computeMVP();
+
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	// Set our "myTextureSampler" sampler to user Texture Unit 0
+	glUniform1i(TextureID, 0);
+
+	drawBuffers();
 
 	//////////////////////////////////////////////////
 	//remove life from player and play explosion sound
@@ -710,15 +788,7 @@ void destroyPlayer (Player* player){
 	glUseProgram(programID);
 
 	// Compute the MVP matrix from keyboard and mouse input
-	computeMatricesFromInputs();
-	Projection = getProjectionMatrix();
-	View = getViewMatrix();
-	ModelMatrix = glm::mat4(1.0);
-	MVP = Projection * View * ModelMatrix;
-
-	// Send our transformation to the currently bound shader, 
-	// in the "MVP" uniform
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+	computeMVP();
 
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
@@ -726,41 +796,7 @@ void destroyPlayer (Player* player){
 	// Set our "myTextureSampler" sampler to user Texture Unit 0
 	glUniform1i(TextureID, 0);
 
-	// 1rst attribute buffer : vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
-	glVertexAttribPointer(
-		0,                  // attribute
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-
-	// 2nd attribute buffer : UVs
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]) ;
-	glVertexAttribPointer(
-		1,                                // attribute
-		2,                                // size
-		GL_FLOAT,                         // type
-		GL_FALSE,                         // normalized?
-		0,                                // stride
-		(void*)0                          // array buffer offset
-		);
-
-	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-
-	// Swap buffers
-	glfwSwapBuffers(window);
-	glfwPollEvents();
+	drawBuffers();
 
 }
 
@@ -780,7 +816,7 @@ void levelOne()
 	level = 1;
 	playerLives = 3;
 	score = 0;
-	setupScore(score);
+	setupScore(score, -19, 1);
 
 	char* url;
 	// Load the texture
@@ -811,19 +847,7 @@ void levelOne()
 	enemyCount = enemies.size();
 	setupBullets(BULLET_COUNT);
 
-	// Load it into a VBO
-
-	//GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-	//GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-
-	
+	setupBuffers();
 
 	//do loop
 	do{
@@ -909,15 +933,7 @@ void levelOne()
 		refreshScore();
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
-		Projection = getProjectionMatrix();
-		View = getViewMatrix();
-		ModelMatrix = glm::mat4(1.0);
-		MVP = Projection * View * ModelMatrix;
-
-		// Send our transformation to the currently bound shader, 
-		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		computeMVP();
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -925,41 +941,7 @@ void levelOne()
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i(TextureID, 0);
 
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]);
-		glVertexAttribPointer(
-			0,                  // attribute
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]);
-		glVertexAttribPointer(
-			1,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
-
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-
-		// Swap buffers
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		drawBuffers();
 
 		lastTime = currentTime;
 
@@ -982,7 +964,7 @@ void levelOne()
 	//cleanup and next splash screen
 	//clear buffer vextors
 	clearVertices();
-
+	showScoreScreen();
 	showSplashScreen(url);
 }
 
@@ -992,7 +974,7 @@ void levelTwo() {
 	//setup
 	level = 2;
 	//playerLives = 3;
-	setupScore(score);
+	setupScore(score, -19, 1);
 
 	char* url;
 	// Load the texture
@@ -1049,13 +1031,80 @@ void levelTwo() {
 		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
 		
 	}
+	y+=5;
+
+	for(float x= 1; x<17; x+=2.5,y+= 1.75){
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+		enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+		enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+		enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		
+	}
+	
+	y+=15;
+	for(float x= 19; x>0; x-=2.0){
+		if (x != 5){
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		}
+	}
+
+	y+=15;
+	for(float x= 19; x>0; x-=2.0){
+		if (x != 9){
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		}
+	}
+
+	y+=15;
+	for(float x= 19; x>0; x-=2.0){
+		if (x != 13){
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		}
+	}
+
+	y+=15;
+	for(float x= 19; x>0; x-=2.0){
+		if (x != 1){
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(x,y+4,0.0f)));
+
+
+			enemies.push_back(addCrystal(vertices,uvs,normals,glm::vec3(-x,y,0.0f)));
+			enemies.push_back(addRose(vertices,uvs,normals,glm::vec3(-x,y+2,0.0f)));
+			enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-x,y+4,0.0f)));
+		}
+	}
+	enemies.push_back(addClasp(vertices,uvs,normals,glm::vec3(-1.0,y+4,0.0f)));
 
 	//mothership
-	//wave.push_back(addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+23.0,0.0f)));
-	
-	//wave[wave.size()-1]->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
-
-	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y+30.0,0.0f));
+	y+=30;
+	mother = addMothership(vertices,uvs,normals,glm::vec3(0.0f,y,0.0f));
 	mother->scale(vertices,glm::vec3(20.0f,20.0f,1.0f));
 
 	enemyCount = enemies.size();
@@ -1065,17 +1114,7 @@ void levelTwo() {
 
 	// Load it into a VBO
 
-	//GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-
-	//GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-
-	
+	setupBuffers();
 
 	//do loop
 	do{
@@ -1180,15 +1219,7 @@ void levelTwo() {
 		refreshScore();
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
-		Projection = getProjectionMatrix();
-		View = getViewMatrix();
-		ModelMatrix = glm::mat4(1.0);
-		MVP = Projection * View * ModelMatrix;
-
-		// Send our transformation to the currently bound shader, 
-		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		computeMVP();
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
@@ -1196,41 +1227,7 @@ void levelTwo() {
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i(TextureID, 0);
 
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), &vertices[0]) ;
-		glVertexAttribPointer(
-			0,                  // attribute
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, uvs.size()*sizeof(glm::vec2), &uvs[0]);
-		glVertexAttribPointer(
-			1,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
-
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size() );
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-
-		// Swap buffers
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		drawBuffers();
 
 		lastTime = currentTime;
 		
@@ -1260,7 +1257,7 @@ void levelTwo() {
 	//cleanup and next splash screen
 	//clear buffer vextors
 	clearVertices();
-
+	showScoreScreen();
 	showSplashScreen(url);
 }
 
