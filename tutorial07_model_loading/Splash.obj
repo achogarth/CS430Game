@@ -8,17 +8,16 @@ mtllib cube.mtl
 
 
 #Player vertices
-v -20 3 0
-v 20 3 0
 v -20 0 0
 v 20 0 0
+v -20 30 0
+v 20 30 0
 
 #Player textures
-
+vt 0 0
+vt 1 0
 vt 0 1
 vt 1 1
-vt 0  0.875
-vt 1 0.875
 
 
 #normal
@@ -29,5 +28,5 @@ usemtl Material_ray.png
 s off
 
 #Player triangles
-f 1/1/1 3/3/1 2/2/1
-f 2/2/1 3/3/1 4/4/1
+f 3/3/1 1/1/1 4/4/1
+f 4/4/1 1/1/1 2/2/1

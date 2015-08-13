@@ -16,7 +16,8 @@ public:
 		glm::vec3 location, //location to place object
 		int textureRow,
 		int textureColumn,
-		float speed
+		float speed,
+		int hitpoints
 		);
 
 	~Entity(void);
@@ -26,7 +27,7 @@ public:
 		std::vector<glm::vec2> & out_uvs,
 		std::vector<glm::vec3> & out_normals);
 
-	virtual bool collide(); //virtual makes this abstract
+	virtual bool collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer, int &score); //virtual makes this abstract
 
 	virtual void move(std::vector<glm::vec3> & vertexBuffer, glm::vec3 location);
 
@@ -38,7 +39,7 @@ public:
 
 	void moveY(std::vector<glm::vec3> & vertexBuffer, float time);
 
-	void setTexture(
+	virtual void setTexture(
 		int row, 
 		int col, 
 		std::vector<glm::vec2> & textureBuffer
@@ -48,20 +49,22 @@ public:
 
 	double getLifeSpan(void);
 
-	void destroy(std::vector<glm::vec3> & vertexBuffer);
+	void virtual destroy(std::vector<glm::vec3> & vertexBuffer, std::vector<glm::vec2> & textureBuffer);
 
 	void scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale);
 
 	void activate();
 
-	void deactivate(std::vector<glm::vec3> & vertexBuffer);
+	void deactivate(void);
 
 	bool isActive(void);
+
+	float getSpeed();
 
 private:
 	int position;
 	int length;
-	int hitpoints;
+	int health;
 	int mySpeed;
 	double creationTime;
 	bool active;

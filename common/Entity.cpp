@@ -13,6 +13,7 @@
 #include <cstring>
 #include <common/objloader.hpp>
 #include <algorithm>
+#include <stdlib.h>
 
 #include <iostream>
 #include <glm\gtx\string_cast.hpp>
@@ -20,7 +21,7 @@
 
 int position;
 int vertexCount;
-int hitpoints;
+int health;
 int mySpeed;
 int currentTextureRow, currentTextureCol;
 double creationTime;
@@ -34,7 +35,8 @@ Entity::Entity(
 	glm::vec3 location,
 	int textureRow,
 	int textureColumn,
-	float speed)
+	float speed,
+	int hitpoints)
 {
 	//save references to buffers
 	//save index of first vertex
@@ -54,7 +56,7 @@ Entity::Entity(
 	}
 
 	//set hitpoints
-	hitpoints = 1;
+	health = hitpoints;
 
 	//set speed
 	mySpeed = speed;
@@ -84,8 +86,96 @@ bool Entity::loadObject(const char * path,
 	return loadOBJ(path, out_vertices, out_uvs, out_normals);
 }
 
-bool Entity::collide()
+bool Entity::collide(std::vector<glm::vec3> & vertexBuffer, std::vector<Entity*> & bullets, Entity * player, int &enemyCount, int level, std::vector<glm::vec2> & textureBuffer, int &score)
 {
+	if (active){
+		//get center of this item
+		glm::vec3 self = glm::vec3(1.0f);
+		getLocation(vertexBuffer, self);
+
+		glm::vec3 other = glm::vec3(1.0f);
+
+		float dx, dy, distance;
+
+		//check bullet collisions
+		for (int i = 0; i < bullets.size(); i++)
+		{
+			//get center of bullet
+			bullets[i]->getLocation(vertexBuffer, other);
+			
+			dx = self.x - other.x;
+			dy = self.y - other.y;
+
+			distance = sqrt(dx * dx + dy * dy);
+
+			if (distance < 1.5)
+			{
+				//collision
+				health -= 1;
+				if (health < 1)
+				{
+					destroy(vertexBuffer, textureBuffer);
+					enemyCount--;
+					if (level == 1) {score += int(self.y);}
+					else {score += 5;}
+				}
+				bullets[i]->destroy(vertexBuffer, textureBuffer);
+				return false;
+			}
+		}
+
+		//check player collisions
+		player->getLocation(vertexBuffer,other);
+
+		dx = self.x - other.x;
+		dy = self.y - other.y;
+
+		distance = sqrt(dx * dx + dy * dy);
+
+		if (distance < 1.5)
+		{
+			//collision
+			destroy(vertexBuffer, textureBuffer);
+			enemyCount--;
+			if (score > 100) {
+				score -= 100; 
+				
+					
+			}
+			else
+			{
+				score = 0;
+			}
+			return true;
+		}
+
+		//check ground collision
+		if (level == 1)
+		{
+			if(self.y < 4.0)
+			{
+				if (score > 100) {
+					score -= 100; 
+				}
+				else
+				{
+					score = 0;
+				}
+				return true;
+			}
+		}
+		if (level == 2)
+		{
+			if (self.y < 0.0){
+				score += 7;
+				deactivate();
+				move(vertexBuffer, glm::vec3(40.0f,10.0f,0.0f));
+				deactivate();
+			}
+			
+		}
+
+	}
 	return false;
 }
 
@@ -234,15 +324,12 @@ double Entity::getLifeSpan(void)
 	return glfwGetTime() - creationTime;
 }
 
-void Entity::destroy(std::vector<glm::vec3> & vertexBuffer)
+void Entity::destroy(std::vector<glm::vec3> & vertexBuffer, std::vector<glm::vec2> & textureBuffer)
 {
-	glm::vec3 point = glm::vec3(0.0f,-10.0f,0.0f);
-	for (int i = position; i < (position + vertexCount); i++)
-	{
-		//std::cout<< "point "<<glm::to_string(point)<< std::endl;
-		vertexBuffer[i] = point;
-		//std::cout<< "buffer " <<glm::to_string(vertexBuffer[i])<< std::endl;
-	}
+	active = false;
+
+	//move to inactive area (0,-10,0)
+	move(vertexBuffer,glm::vec3(40.0f,-10.0f,0.0f));
 }
 
 void Entity::scale(std::vector<glm::vec3> & vertexBuffer, glm::vec3 & scale)
@@ -273,12 +360,12 @@ void Entity::activate()
 	active = true;
 }
 
-void Entity::deactivate(std::vector<glm::vec3> & vertexBuffer)
+void Entity::deactivate()
 {
 	active = false;
-
-	//move to inactive area (0,-10,0)
-	move(vertexBuffer,glm::vec3(0.0f,-10.0f,0.0f));
 }
 
 bool Entity::isActive(void){ return active; }
+
+float Entity::getSpeed(){return mySpeed;}
+

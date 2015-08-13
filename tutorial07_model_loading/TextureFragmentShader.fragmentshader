@@ -13,4 +13,9 @@ void main(){
 
 	// Output color = color of the texture at the specified UV
 	color = texture2D( myTextureSampler, UV ).rgb;
+
+	if (color.rgb == vec3(0.0,0.0,0.0))
+	{
+		discard;
+	}
 }

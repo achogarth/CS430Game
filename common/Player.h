@@ -16,7 +16,8 @@ public:
 		glm::vec3 location, //location to place object
 		int textureRow,
 		int textureColumn,
-		float speed);
+		float speed,
+		int hitpoints);
 
 	~Player();
 
@@ -24,7 +25,5 @@ public:
 
 	int removeLife(); // decrements current lives and returns remaining lives
 
-	bool collide(); // returns true if the player has no lives remaining
-
-	void move();
+	virtual void destroy(std::vector<glm::vec3> & vertexBuffer,std::vector<glm::vec2> & textureBuffer);
 };

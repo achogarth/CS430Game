@@ -1,5 +1,7 @@
 #include <common\Entity.h>
 #include <common\Player.h>
+#include <Windows.h>
+#include <iostream>
 
 using namespace std;
 using namespace glm;
@@ -15,7 +17,8 @@ Player::Player(
 	glm::vec3 location, //location to place object
 	int textureRow,
 	int textureColumn,
-	float speed): Entity(
+	float speed,
+	int hitpoints): Entity(
 	vertexBuffer,
 	uvBuffer,
 	normalBuffer, //textureBuffer
@@ -23,9 +26,21 @@ Player::Player(
 	location, //location to place object
 	textureRow,
 	textureColumn,
-	speed)
+	speed,
+	hitpoints)
 {
 	lives = numOfLives;
+	switch (lives){
+	case 1:
+		setTexture(2,2,uvBuffer);
+		break;
+	case 2:
+		setTexture(2,1,uvBuffer);
+		break;
+	default:
+		setTexture(2,0,uvBuffer);
+		break;
+	}
 }
 
 int Player::getLives(){return lives;}
@@ -40,13 +55,25 @@ int Player::removeLife()
 		return 0;
 }
 
-bool Player::collide(){
-	if (removeLife() == 0)
-	{
-		return true;
+void Player::destroy(std::vector<glm::vec3> & vertexBuffer,std::vector<glm::vec2> & textureBuffer)
+{
+	cout << "Player destroy method called" << endl;
+	setTexture(3,4,textureBuffer);
+	removeLife();
+	switch (lives){
+	case 3:
+		setTexture(2,0,textureBuffer);
+		break;
+	case 2:
+		setTexture(2,1,textureBuffer);
+		break;
+	case 1:
+		setTexture(2,2,textureBuffer);
+		Sleep(2000);
+		break;
+	default:
+		setTexture(3,4,textureBuffer);
+		break;
 	}
-	
-	return false;
-}
 
-void Player::move(){}
+}
