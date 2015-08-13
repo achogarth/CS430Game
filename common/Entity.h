@@ -59,6 +59,8 @@ public:
 
 	bool isActive(void);
 
+	float getSpeed();
+
 private:
 	int position;
 	int length;

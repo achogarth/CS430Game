@@ -367,3 +367,5 @@ void Entity::deactivate()
 
 bool Entity::isActive(void){ return active; }
 
+float Entity::getSpeed(){return mySpeed;}
+
