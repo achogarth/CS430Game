@@ -939,7 +939,7 @@ void levelOne()
 						for (int i = 0; i < enemies.size(); i++){
 							if (enemies[i]->isActive()){
 								enemies[i]->getLocation(vertices,point1);
-								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+enemies[i]->getSpeed(),point1.z));
 							}
 						}
 						currentTime = glfwGetTime();
@@ -1195,11 +1195,11 @@ void levelTwo() {
 						for (int i = 0; i < enemies.size(); i++){
 							if (enemies[i]->isActive()){
 								enemies[i]->getLocation(vertices,point1);
-								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+								enemies[i]->move(vertices,glm::vec3(point1.x,point1.y+enemies[i]->getSpeed(),point1.z));
 							}
 						}
 						mother->getLocation(vertices,point1);
-						mother->move(vertices,glm::vec3(point1.x,point1.y+5.0f,point1.z));
+						mother->move(vertices,glm::vec3(point1.x,point1.y+mother->getSpeed(),point1.z));
 						currentTime = glfwGetTime();
 					}
 					done = true;
