@@ -1005,13 +1005,13 @@ void levelOne()
 			break;
 		}
 
-		if (enemyCount < 1 || glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (enemyCount < 1)
 		{
 			url = STAGE2;
 			break;
 		}
 
-	} // Check if the ESC key was pressed or the window was closed
+	}
 	while( true);
 
 
@@ -1213,7 +1213,7 @@ void levelTwo() {
 
 		if (mother->collide(vertices, bullets, player, enemyCount, level, uvs)){
 			destroyPlayer(player);
-			if (stage2PacifistCounter == enemies.size()){
+			if (stage2PacifistCounter == enemyCount){
 				score += stage2PacifistCounter;
 			}
 			url=WIN;
@@ -1287,11 +1287,6 @@ void levelTwo() {
 			break;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		{
-			url = WIN;
-			break;
-		}
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( true);
@@ -1368,23 +1363,12 @@ int main( void )
 	// Get a handle for our "MVP" uniform
 	/*GLuint*/ MatrixID = glGetUniformLocation(programID, "MVP");
 	
-	
-
 	/*************************************************************
 						Start Screen Setup
 	**************************************************************/
-	do {
+	
 	clearVertices();
 	showSplashScreen(START);
-	clearVertices();
-	}
-	while (continueGame);
-	/*************************************************************
-						Level One Setup
-	**************************************************************/
-	//levelOne();
-
-	//showLoseScreen();
 
 	closeProgram();
 

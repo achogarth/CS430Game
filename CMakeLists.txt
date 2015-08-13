@@ -64,6 +64,14 @@ add_executable(tutorial07_model_loading
 	common/texture.hpp
 	common/objloader.cpp
 	common/objloader.hpp
+	common/Digit.h
+	common/Digit.cpp
+	common/Entity.h
+	common/Entity.cpp
+	common/Player.h
+	common/Player.cpp
+	common/Mothership.h
+	common/Mothership.cpp
 
 	tutorial07_model_loading/TransformVertexShader.vertexshader
 	tutorial07_model_loading/TextureFragmentShader.fragmentshader
